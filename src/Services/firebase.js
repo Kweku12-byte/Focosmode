@@ -1,23 +1,21 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
+// Your web app's Firebase configuration is now read from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyAd0slJ5HdWVvqKDHoVH82dKuI0MxoYj-0",
-  authDomain: "focosmode-39a5e.firebaseapp.com",
-  projectId: "focosmode-39a5e",
-  storageBucket: "focosmode-39a5e.appspot.com",
-  messagingSenderId: "611401482926",
-  appId: "1:611401482926:web:1a0b898db5add7519be33f",
-  measurementId: "G-ENBCWZ2CDC"
+  apiKey: process.env.REACT_APP_API_KEY,
+  authDomain: process.env.REACT_APP_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_APP_ID,
+  measurementId: process.env.REACT_APP_MEASUREMENT_ID
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize and export Firebase services so we can use them in other files
+// Initialize and export Firebase services
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-
