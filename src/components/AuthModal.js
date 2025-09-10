@@ -291,4 +291,3 @@ const AuthModal = ({ closeModal, initialView }) => {
 };
 
 export default AuthModal;
-

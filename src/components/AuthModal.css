@@ -215,3 +215,45 @@
         box-sizing: border-box;
     }
 }
+/* --- PASSWORD REVEAL ICON STYLES --- */
+.password-input-wrapper {
+    position: relative;
+}
+
+.password-toggle-icon {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+}
+
+.password-toggle-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* --- MOBILE POLISH V2 --- */
+@media (max-width: 480px) {
+    .auth-modal-content {
+        /* Prevents it from being full screen */
+        width: 90%;
+        height: auto;
+        max-height: 90vh; /* Prevents it from being too tall */
+        border-radius: 1rem; /* Re-apply border radius for card look */
+        overflow-y: auto; /* Add scroll if content is too long */
+    }
+
+    /* Prevents iOS from zooming in on input fields */
+    .input-group input {
+        font-size: 16px;
+    }
+}
+

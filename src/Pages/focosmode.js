@@ -433,4 +433,3 @@ const Focosmode = () => {
 };
 
 export default Focosmode;
-
