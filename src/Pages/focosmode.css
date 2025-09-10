@@ -908,3 +908,74 @@ section {
         font-size: 1.5rem;
     }
 }
+/* --- MOBILE POLISH (Add to bottom of focosmode.css) --- */
+@media (max-width: 767px) {
+    .hero-section h2 {
+        /* Reduces the main title size to prevent awkward wrapping */
+        font-size: 2.25rem;
+    }
+
+    .section-title h3 {
+        /* Reduces all section titles for better spacing */
+        font-size: 2rem;
+    }
+
+    .pricing-tier {
+        /* Adds a bit more space inside the pricing cards */
+        padding: 2rem 1.5rem;
+    }
+
+    .pricing-tier .price {
+        /* Makes the price text slightly smaller on mobile */
+        font-size: 2.75rem;
+    }
+
+    .slider-btn.prev {
+        /* Moves the slider button in from the edge */
+        left: 5px;
+    }
+    
+    .slider-btn.next {
+        /* Moves the slider button in from the edge */
+        right: 5px;
+    }
+}
+/* --- HOMEPAGE MOBILE POLISH V2 (Add to bottom of focosmode.css) --- */
+@media (max-width: 767px) {
+    /* --- Fix for "Trusted by" section --- */
+    .trusted-by-container {
+        /* Stack the avatars on top of the text */
+        flex-direction: column;
+        gap: 1.5rem; /* Increase space between avatars and text */
+    }
+
+    /* --- Fix for "Demo Store" section --- */
+    .demo-store-window {
+        /* Ensure the component has some side padding and doesn't overflow */
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        box-sizing: border-box;
+    }
+
+    .store-ui {
+        /* Ensure it stacks correctly on all mobile sizes */
+        flex-direction: column;
+    }
+
+    .store-top-bar {
+        /* Allow search and controls to wrap onto a new line if needed */
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .search-bar {
+        /* Allow the search bar to take up the full width if it wraps */
+        flex-grow: 1;
+        width: 100%;
+    }
+
+    .live-demo-products-grid {
+        /* Override the complex grid with a simple, clean 2-column layout */
+        grid-template-columns: 1fr 1fr;
+    }
+}
