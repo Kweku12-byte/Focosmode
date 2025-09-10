@@ -1,0 +1,209 @@
+/* --- Auth Modal Overlay & Content --- */
+.auth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(17, 24, 39, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease;
+}
+
+.auth-modal-content {
+    background-color: #fff;
+    padding: 2.5rem;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: slideUp 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+}
+.close-modal-btn svg {
+    width: 24px;
+    height: 24px;
+}
+.close-modal-btn:hover {
+    color: #1f2937;
+}
+
+
+/* --- Auth View General Styling --- */
+.auth-view {
+    text-align: center;
+}
+.auth-view h3 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 0.5rem;
+}
+.auth-view p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+}
+
+/* --- Google Sign-in Button --- */
+.google-signin-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background-color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.google-signin-btn:hover {
+    background-color: #f9fafb;
+}
+
+/* --- Divider --- */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #9ca3af;
+    margin: 1.5rem 0;
+}
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e5e7eb;
+}
+.auth-divider span {
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* --- Form Elements --- */
+.input-group {
+    text-align: left;
+    margin-bottom: 1rem;
+}
+.input-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #374151;
+}
+.input-group input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+}
+.input-group input:focus {
+    outline: none;
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 2px #fef3c7;
+}
+
+.auth-submit-btn {
+    width: 100%;
+    background-color: #f59e0b;
+    color: #111827;
+    font-weight: 700;
+    padding: 0.875rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.auth-submit-btn:hover {
+    background-color: #fbbf24;
+}
+.auth-submit-btn:disabled {
+    background-color: #d1d5db;
+    cursor: not-allowed;
+}
+
+/* --- Error & Success Messages --- */
+.auth-error {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    text-align: center;
+}
+.auth-success-message {
+    background-color: #dcfce7;
+    color: #166534;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    line-height: 1.6;
+}
+
+/* --- View Switching & Forgot Password --- */
+.auth-switch {
+    margin-top: 1.5rem;
+    font-size: 0.875rem;
+}
+.auth-switch button {
+    background: none;
+    border: none;
+    color: #f59e0b;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 0.25rem;
+}
+.forgot-password-container {
+    text-align: right;
+    margin-bottom: 1rem;
+}
+.forgot-password-btn {
+    background: none;
+    border: none;
+    font-size: 0.875rem;
+    color: #f59e0b;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+
+/* --- Responsive Styles --- */
+@media (max-width: 480px) {
+    .auth-modal-content {
+        padding: 2rem 1.5rem;
+        height: 100%;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 0;
+    }
+}
