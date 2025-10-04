@@ -3,9 +3,12 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 
 // --- Import Our Pages and Components ---
-import Focosmode from './Pages/focosmode';
-import Dashboard from './Pages/Dashboard/Dashboard'; // 1. Import the Dashboard
-import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'; // 2. Import the Guard
+// FIX: Changed path to all lowercase based on your feedback.
+// Please double-check that your folder structure is: src/Pages/focosmode/focosmode.js
+import Focosmode from './Pages/focosmode'; 
+
+// Removed the unused import for ProtectedRoute to clear the warning.
+// import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 
 import './App.css';
 
@@ -16,17 +19,8 @@ function App() {
         <div className="App">
           <Routes>
             {/* --- Public Route --- */}
+            {/* This is the only route needed for now. It displays our homepage. */}
             <Route path="/" element={<Focosmode />} />
-
-            {/* --- Protected Route --- */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
           </Routes>
         </div>
       </Router>

@@ -1035,3 +1035,117 @@ section {
         justify-content: center;
     }
 }
+
+/* --- HOMEPAGE MOBILE POLISH V3 (Add to bottom of focosmode.css) --- */
+@media (max-width: 767px) {
+    /* --- General Section Spacing --- */
+    section {
+        /* Reduce vertical padding to create a tighter, faster-scrolling page */
+        padding: 4rem 0;
+    }
+
+    .section-title h3 {
+        /* Reduces all section titles for better spacing */
+        font-size: 2rem;
+    }
+
+    .hero-section h2 {
+        /* Reduces the main title size to prevent awkward wrapping */
+        font-size: 2.25rem;
+    }
+
+    .hero-section p {
+        /* Add more space between the subtitle and the main button */
+        margin-bottom: 2rem;
+    }
+
+    /* --- Social Proof Fix --- */
+    .social-proof-section {
+        /* Reduce padding to make it a smaller, tighter section */
+        padding: 2.5rem 0;
+    }
+    .trusted-by-container {
+        /* Stack the avatars on top of the text */
+        flex-direction: column;
+        gap: 1.5rem; /* Increase space between avatars and text */
+        text-align: center;
+    }
+
+    /* --- Demo Store Fix --- */
+    .store-ui {
+        /* Ensure it stacks vertically on all mobile sizes */
+        flex-direction: column;
+    }
+    
+    .store-sidebar {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: center;
+    }
+
+    .store-top-bar {
+        /* Allow search and controls to wrap onto a new line if needed */
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .search-bar {
+        /* Allow the search bar to take up the full width if it wraps */
+        flex-grow: 1;
+        width: 100%;
+    }
+
+    .live-demo-products-grid {
+        /* A simple, clean 2-column layout, just like the Selar example */
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* --- How It Works Fix --- */
+    .steps-container {
+        /* Add more vertical space between the step cards */
+        flex-direction: column;
+        align-items: center;
+        gap: 3rem;
+    }
+
+    /* --- Pricing Section Fix --- */
+    .pricing-grid {
+        /* Add more space between the two pricing cards */
+        gap: 2.5rem;
+    }
+
+    .pricing-tier {
+        padding: 2rem 1.5rem;
+    }
+
+    .pricing-tier .price {
+        font-size: 2.75rem;
+    }
+    
+    /* --- Testimonial Slider Fix --- */
+     .slider-btn.prev {
+        left: 5px; /* Moves the slider button in from the edge */
+     }
+     .slider-btn.next {
+        right: 5px; /* Moves the slider button in from the edge */
+     }
+
+    /* --- Footer Fix --- */
+    .footer-container {
+        /* Stack all footer columns vertically */
+        grid-template-columns: 1fr;
+        text-align: center; /* Center-align the text in each column */
+        gap: 1.5rem;
+    }
+
+    .footer-col {
+        /* Add space between each stacked column */
+        margin-bottom: 1.5rem;
+    }
+    
+    .social-icons {
+        /* Center the social media icons */
+        justify-content: center;
+    }
+}
