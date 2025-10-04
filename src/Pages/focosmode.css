@@ -1255,3 +1255,31 @@ section {
 .cta-button.primary:hover {
     background-image: linear-gradient(to right, #fbbf24, #f59e0b);
 }
+
+/* --- DEMO STORE SECTION - VISUAL UPGRADE (Add to bottom of focosmode.css) --- */
+
+/* 1. Makes the logo in the demo sidebar rounded */
+.demo-store-logo {
+    border-radius: 0.75rem; /* This rounds the corners */
+}
+
+/* 2. Adds the curved background effect */
+.demo-store-section {
+    position: relative; /* Required for the pseudo-element positioning */
+    z-index: 1;
+    overflow: hidden; /* Hides the parts of the curve that go off-screen */
+}
+
+.demo-store-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -50%; /* Starts the curve off-screen to the left */
+    width: 200%; /* Makes the element wide enough to curve across the screen */
+    height: 100%;
+    background-color: #ecb51c; /* A soft, pleasant version of our brand yellow */
+    border-bottom-left-radius: 50%; /* Creates the curve */
+    border-bottom-right-radius: 50%; /* Creates the curve */
+    z-index: -1; /* Puts the yellow shape behind the content */
+    transform: translateY(-40%); /* Pushes most of the circle shape up, leaving a nice curve */
+}

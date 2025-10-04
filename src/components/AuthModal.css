@@ -257,3 +257,25 @@
     }
 }
 
+/* --- MOBILE STYLING (Add to bottom of AuthModal.css) --- */
+
+@media (max-width: 480px) {
+    .auth-modal-content {
+        /* This turns the modal into a stable card instead of a full-screen view */
+        width: 90%;
+        height: auto; /* Height adjusts to content, doesn't fill screen */
+        max-height: 90vh; /* Prevents it from being too tall on any screen */
+        border-radius: 1rem; /* Re-applies the rounded corners for a card look */
+        overflow-y: auto; /* Adds scrolling if the content is too long for the screen */
+        padding: 2rem 1.5rem;
+        box-sizing: border-box;
+
+        /* This ensures the slide-up animation still works correctly */
+        animation: slideUp 0.4s ease;
+    }
+
+    /* This prevents iOS from zooming in on input fields, which causes layout shifts */
+    .input-group input {
+        font-size: 16px;
+    }
+}
