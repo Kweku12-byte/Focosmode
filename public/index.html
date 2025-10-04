@@ -2,42 +2,49 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <!-- UPDATE 1: Link to your new favicon -->
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
+    <!-- UPDATE 2: Set the browser theme color to our brand yellow -->
+    <meta name="theme-color" content="#f59e0b" />
+
+    <!-- 
+      UPDATE 3: THE CORE SEO
+      This is the description that will appear under your site title in Google search results.
+      It should be concise, compelling, and include keywords.
+    -->
     <meta
       name="description"
-      content="Web site created using create-react-app"
+      content="Focosmode is the all-in-one tool for Ghanaian , African's & Global SMEs. Manage sales, inventory, expenses, and launch an online store instantly. Start your free trial today."
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+
+    <!-- This links to a larger version of your logo for bookmarks, etc. -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo512.png" />
+    
     <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+      UPDATE 4: SOCIAL MEDIA PREVIEWS (Open Graph & Twitter)
+      This is what controls the preview card when your link is shared on Facebook, WhatsApp, Twitter, etc.
+    -->
+    <meta property="og:title" content="Focosmode | The All-in-One Business Tool for SMEs" />
+    <meta property="og:description" content="Manage sales, inventory, expenses, and launch an online store instantly." />
+    <!-- IMPORTANT: Replace this with the full URL to your logo image once uploaded! -->
+    <meta property="og:image" content="https://www.focosmode.com/logo512.png" />
+    <meta property="og:url" content="https://www.focosmode.com" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+
+    <!--
+      This file tells browsers how your app should behave if 'installed' on a user's home screen.
+      We can edit manifest.json next.
     -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
+    
+    <!-- UPDATE 5: THE PAGE TITLE -->
+    <title>Focosmode | The All-in-One Business Tool for SMEs</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
   </body>
 </html>
