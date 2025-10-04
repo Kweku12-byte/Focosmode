@@ -1299,7 +1299,7 @@ section {
 
     .brand-showcase-logo {
         /* Reduces the size of the logo on smaller screens */
-        width: 80px;
-        height: 80px;
+        width: 120px;
+        height: 120x;
     }
 }
