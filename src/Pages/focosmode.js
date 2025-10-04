@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './focosmode.css';
-import AuthModal from '../components/AuthModal'; // This path is correct
+// FIX: Corrected the import path for AuthModal based on your project structure.
+import AuthModal from '../components/AuthModal';
 
 // --- SVG Icon Components ---
 const CheckIcon = () => <svg className="check-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>;
@@ -40,6 +41,17 @@ const Focosmode = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [currentSlide, setCurrentSlide] = useState(0);
     const menuRef = useRef(null);
+    const currencyRef = useRef(null);
+
+    // --- NEW: CURRENCY DROPDOWN STATE ---
+    const [isCurrencyDropdownOpen, setCurrencyDropdownOpen] = useState(false);
+    const currencies = [
+        { code: 'GHS', flag: '🇬🇭' },
+        { code: 'NGN', flag: '🇳🇬' },
+        { code: 'USD', flag: '🇺🇸' },
+        { code: 'GBP', flag: '🇬🇧' },
+    ];
+    const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]);
 
     // --- MODAL STATE AND HANDLERS ---
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -51,7 +63,6 @@ const Focosmode = () => {
         setIsMenuOpen(false); // Close mobile menu if open
     };
     
-    // The close function passed to the modal
     const closeAuthModal = () => {
         setIsAuthModalOpen(false);
     };
@@ -90,23 +101,30 @@ const Focosmode = () => {
 
     useEffect(() => {
         const handleClickOutside = (event) => {
+            // Close mobile menu
             if (menuRef.current && !menuRef.current.contains(event.target)) {
                 setIsMenuOpen(false);
+            }
+            // Close currency dropdown
+            if (currencyRef.current && !currencyRef.current.contains(event.target)) {
+                setCurrencyDropdownOpen(false);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [menuRef]);
+    }, [menuRef, currencyRef]);
 
     return (
         <div className="focosmode-page">
-            {/* --- FIX: Conditionally render the modal AND pass the correct props --- */}
             {isAuthModalOpen && <AuthModal closeModal={closeAuthModal} initialView={authInitialView} />}
 
             {/* --- Header --- */}
             <header className="header">
                 <div className="container header-container">
-                    <a href="/" className="logo">Focosmode</a>
+                    {/* --- UPDATE: Logo Added --- */}
+                    <a href="/" className="logo">
+                        <img src="https://placehold.co/140x40/f59e0b/111827?text=Focosmode" alt="Focosmode Logo" />
+                    </a>
                     <div ref={menuRef}>
                         <button className="mobile-menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                             {isMenuOpen ? <XIcon /> : <MenuIcon />}
@@ -115,7 +133,6 @@ const Focosmode = () => {
                             <a href="#how-it-works">How It Works</a>
                             <a href="#features">Features</a>
                             <a href="#pricing">Pricing</a>
-                            {/* --- FIX: Using consistent class for styling --- */}
                             <button onClick={() => openAuthModal('login')} className="login-btn">Login</button>
                             <button onClick={() => openAuthModal('signup')} className="cta-button primary nav-cta">Get Started</button>
                         </nav>
@@ -167,6 +184,12 @@ const Focosmode = () => {
                                     <div className="store-brand">
                                         <img src="https://placehold.co/80x80/1f2937/ffffff?text=S" alt="Store Logo" className="demo-store-logo" />
                                         <h3>Demo Store</h3>
+                                        {/* --- UPDATE: Social Icons Added --- */}
+                                        <div className="demo-store-socials">
+                                            <a href="#"><InstagramIcon /></a>
+                                            <a href="#"><TiktokIcon /></a>
+                                            <a href="#"><FacebookIcon /></a>
+                                        </div>
                                         <p>You can sell anything with Focosmode!</p>
                                     </div>
                                 </div>
@@ -177,10 +200,26 @@ const Focosmode = () => {
                                             <input type="text" placeholder="Search for a product" />
                                         </div>
                                         <div className="store-controls">
-                                            <div className="currency-selector">
-                                                <span>🇬🇭</span>
-                                                <span>GHS</span>
-                                                <ChevronDownIcon />
+                                            {/* --- UPDATE: Currency Dropdown --- */}
+                                            <div className="currency-selector" ref={currencyRef}>
+                                                <button onClick={() => setCurrencyDropdownOpen(!isCurrencyDropdownOpen)}>
+                                                    <span>{selectedCurrency.flag}</span>
+                                                    <span>{selectedCurrency.code}</span>
+                                                    <ChevronDownIcon isOpen={isCurrencyDropdownOpen} />
+                                                </button>
+                                                {isCurrencyDropdownOpen && (
+                                                    <ul className="currency-dropdown">
+                                                        {currencies.map(currency => (
+                                                            <li key={currency.code} onClick={() => {
+                                                                setSelectedCurrency(currency);
+                                                                setCurrencyDropdownOpen(false);
+                                                            }}>
+                                                                <span>{currency.flag}</span>
+                                                                <span>{currency.code}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
                                             </div>
                                             <div className="cart-container">
                                                 <CartIcon />
