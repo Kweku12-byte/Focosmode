@@ -427,6 +427,17 @@ const Focosmode = () => {
                 </section>
             </main>
 
+            {/* --- NEW: Brand Logo Showcase Section (Added before Footer) --- */}
+            <section className="brand-showcase-section">
+                <div className="container">
+                    <img 
+                        src="/logo512.png" 
+                        alt="Focosmode Brand Logo" 
+                        className="brand-showcase-logo"
+                    />
+                </div>
+            </section>
+
             {/* --- Footer --- */}
             <footer className="footer">
                 <div className="container footer-container">
@@ -472,3 +483,4 @@ const Focosmode = () => {
 };
 
 export default Focosmode;
+
