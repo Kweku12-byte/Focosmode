@@ -1283,3 +1283,23 @@ section {
     z-index: -1; /* Puts the yellow shape behind the content */
     transform: translateY(-40%); /* Pushes most of the circle shape up, leaving a nice curve */
 }
+
+/* --- BRAND SHOWCASE - MOBILE POLISH (Add to bottom of focosmode.css) --- */
+
+@media (max-width: 767px) {
+    .brand-showcase-section {
+        /* Reduces the vertical space to feel more integrated */
+        padding: 2.5rem 0; 
+    }
+
+    .brand-showcase-section .container {
+        /* This confirms the logo is centered */
+        justify-content: center;
+    }
+
+    .brand-showcase-logo {
+        /* Reduces the size of the logo on smaller screens */
+        width: 80px;
+        height: 80px;
+    }
+}
