@@ -159,7 +159,7 @@ const Focosmode = () => {
                                     <span className="window-dot green"></span>
                                 </div>
                                 <div className="browser-url-bar">
-                                    https://focosmode.com/yourdemostore
+                                    https://focosmode.com/demo
                                 </div>
                             </div>
                             <div className="store-ui">
