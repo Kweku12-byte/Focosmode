@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-// FIX: Corrected import paths based on standard project structure.
-// These paths assume FocosmodeDashboard.jsx is inside 'src/Pages/Dashboard/'.
 import './FocosmodeDashboard.css';
+// FIX: Corrected import paths to be relative from the 'Pages/Dashboard' directory
 import { useAuth } from '../../context/AuthContext';
-import { db, auth } from '../../Services/firebase'; // Also imported 'auth' for logout
+import { db, auth } from '../../Services/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 
+// FIX: Corrected import path for the Inventory component
+import Inventory from './Inventory';
+// UPDATE: Import the new Sales component
+import Sales from './Sales';
 
 // --- Icon Components (for the sidebar) ---
 const DashboardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
@@ -29,12 +32,10 @@ const FocosmodeDashboard = () => {
 
     useEffect(() => {
         if (!currentUser) {
-            // This case should be handled by ProtectedRoute, but as a fallback
             setLoading(false);
             return;
         }
 
-        // Set up a real-time listener for the user's business document
         const docRef = doc(db, 'businesses', currentUser.uid);
         const unsubscribe = onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
@@ -49,7 +50,6 @@ const FocosmodeDashboard = () => {
             setLoading(false);
         });
 
-        // Cleanup the listener when the component unmounts
         return () => unsubscribe();
     }, [currentUser]);
 
@@ -63,7 +63,6 @@ const FocosmodeDashboard = () => {
     };
 
     const renderActiveView = () => {
-        // This is where we will plug in our feature components later
         switch (activeView) {
             case 'dashboard':
                 return (
@@ -73,10 +72,10 @@ const FocosmodeDashboard = () => {
                     </div>
                 );
             case 'inventory':
-                return <div><h2>Inventory Management</h2><p>Coming Soon...</p></div>;
+                return <Inventory />;
             case 'sales':
-                return <div><h2>Sales & POS</h2><p>Coming Soon...</p></div>;
-            // Add other cases for customers, reports, etc.
+                // UPDATE: The Sales component is now rendered here
+                return <Sales />;
             default:
                 return <div><h1>Welcome!</h1></div>;
         }
@@ -95,7 +94,7 @@ const FocosmodeDashboard = () => {
             className={`nav-button ${activeView === view ? 'active' : ''}`}
             onClick={() => {
                 setActiveView(view);
-                setIsSidebarOpen(false); // Close sidebar on selection (mobile)
+                setIsSidebarOpen(false);
             }}
         >
             <Icon />
@@ -116,7 +115,6 @@ const FocosmodeDashboard = () => {
                     <NavButton view="dashboard" label="Dashboard" icon={DashboardIcon} />
                     <NavButton view="inventory" label="Inventory" icon={InventoryIcon} />
                     <NavButton view="sales" label="Sales" icon={SalesIcon} />
-                    {/* We will add more buttons here for Customers, Reports, etc. */}
                 </nav>
                 <div className="sidebar-footer">
                     <button className="nav-button logout" onClick={handleLogout}>

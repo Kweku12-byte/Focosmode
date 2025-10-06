@@ -1,0 +1,300 @@
+.pos-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    height: calc(100vh - 10rem); /* Adjust based on your header/padding */
+}
+
+/* --- Product Selection Area (Left Side) --- */
+.product-selection, .cart-summary {
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+.pos-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.pos-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.product-grid {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.product-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+}
+.product-card:hover {
+    border-color: #f59e0b;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+.product-card:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.product-card-image {
+    height: 120px;
+    background-size: cover;
+    background-position: center;
+    background-color: #f9fafb;
+}
+
+.product-card-info {
+    padding: 0.75rem;
+    text-align: left;
+}
+.product-name {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.product-price {
+    font-weight: 500;
+    color: #1f2937;
+}
+.product-stock {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.out-of-stock-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    color: #ef4444;
+}
+
+/* --- Cart Summary (Right Side) --- */
+.cart-summary {
+    justify-content: space-between;
+}
+
+.empty-cart {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #6b7280;
+    padding: 2rem;
+}
+
+.cart-items {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1rem 1.5rem;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+.item-name { font-weight: 600; }
+.item-price { font-size: 0.875rem; color: #6b7280; }
+
+.item-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.item-controls span { font-weight: 600; min-width: 20px; text-align: center; }
+.item-controls button {
+    border: 1px solid #d1d5db;
+    background-color: #fff;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+.item-controls button svg { width: 16px; height: 16px; }
+.item-controls button.remove-btn { border: none; color: #ef4444; }
+.item-controls button.remove-btn:hover { background-color: #fee2e2; }
+
+.cart-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.total-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1.5rem;
+}
+.total-label {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+.total-amount {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #111827;
+}
+
+.checkout-btn {
+    width: 100%;
+    background-color: #10b981;
+    color: #fff;
+    font-weight: 700;
+    padding: 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1.125rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.checkout-btn:hover {
+    background-color: #059669;
+}
+.checkout-btn:disabled {
+    background-color: #d1d5db;
+    cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+    .pos-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+    .cart-summary {
+        margin-top: 2rem;
+    }
+}
+/* --- SALES UPGRADES (Add to bottom of Sales.css) --- */
+
+/* --- Payment Method Selector --- */
+.payment-method-selector {
+    margin-bottom: 1.5rem;
+}
+.payment-method-selector label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #4b5563;
+}
+.payment-method-selector select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    background-color: #fff;
+}
+
+/* --- Receipt Modal --- */
+.receipt-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(17, 24, 39, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+}
+.receipt-modal-content {
+    background-color: #fff;
+    border-radius: 1rem;
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
+.receipt-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+.receipt-header svg {
+    width: 48px;
+    height: 48px;
+    color: #10b981;
+}
+.receipt-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+.receipt-details {
+    text-align: left;
+    margin-bottom: 2rem;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1rem 0;
+}
+.receipt-details p {
+    margin-bottom: 0.5rem;
+}
+.receipt-details ul {
+    list-style-position: inside;
+    padding-left: 0.5rem;
+}
+.receipt-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.receipt-btn {
+    width: 100%;
+    font-weight: 700;
+    padding: 0.875rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.receipt-btn.copy {
+    background-color: #f59e0b;
+    color: #111827;
+}
+.receipt-btn.new-sale {
+    background-color: #e5e7eb;
+    color: #1f2937;
+}

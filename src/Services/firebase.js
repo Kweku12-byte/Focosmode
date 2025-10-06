@@ -1,6 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+// UPDATE: Import the getStorage function
+import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration is now read from environment variables
 const firebaseConfig = {
@@ -19,3 +21,5 @@ const app = initializeApp(firebaseConfig);
 // Initialize and export Firebase services
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+// UPDATE: Initialize and export Firebase Storage
+export const storage = getStorage(app);

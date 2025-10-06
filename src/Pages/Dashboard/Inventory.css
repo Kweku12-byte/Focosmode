@@ -1,0 +1,290 @@
+.inventory-container {
+    /* Basic container styles */
+}
+
+.inventory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.inventory-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.add-product-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #f59e0b;
+    color: #111827;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.add-product-btn:hover {
+    background-color: #fbbf24;
+}
+.add-product-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* --- Search Bar --- */
+.search-wrapper {
+    position: relative;
+}
+.search-wrapper svg {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    width: 20px;
+    height: 20px;
+}
+.search-wrapper input {
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    width: 250px;
+}
+.search-wrapper input:focus {
+    outline: none;
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 2px #fef3c7;
+}
+
+
+/* --- No Products View --- */
+.no-products-view {
+    text-align: center;
+    padding: 4rem 2rem;
+    background-color: #fff;
+    border: 2px dashed #e5e7eb;
+    border-radius: 0.75rem;
+}
+.no-products-view h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+}
+.no-products-view p {
+    color: #6b7280;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* --- Products Table --- */
+.products-table-container {
+    background-color: #fff;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    overflow-x: auto;
+}
+.products-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.products-table th, .products-table td {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+.products-table th {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.products-table td {
+    font-size: 1rem;
+    color: #374151;
+}
+
+/* Product Image Thumbnail */
+.product-image-thumbnail {
+    width: 50px;
+    height: 50px;
+    border-radius: 0.5rem;
+    background-size: cover;
+    background-position: center;
+    background-color: #f3f4f6;
+}
+
+/* Product Type Badges */
+.product-type-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-block;
+}
+.product-type-badge.physical { background-color: #dbeafe; color: #1e40af; }
+.product-type-badge.digital { background-color: #dcfce7; color: #166534; }
+.product-type-badge.ticket { background-color: #fef3c7; color: #92400e; }
+
+
+/* --- Action Buttons & Delete Confirmation --- */
+.action-buttons, .delete-confirm {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    padding: 0.5rem;
+    border-radius: 50%;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.action-btn svg {
+    width: 20px;
+    height: 20px;
+}
+.action-btn.edit { color: #4b5563; }
+.action-btn.edit:hover { background-color: #e5e7eb; }
+.action-btn.delete { color: #ef4444; }
+.action-btn.delete:hover { background-color: #fee2e2; }
+
+.delete-confirm span { font-weight: 600; }
+.delete-confirm button { 
+    font-weight: 700;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+.delete-confirm button:first-of-type { color: #dc2626; }
+.delete-confirm button:last-of-type { color: #4b5563; }
+
+
+/* --- Modal Styles (Generic) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(17, 24, 39, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Aligns to top for scrolling */
+    padding-top: 5vh;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+    overflow-y: auto;
+}
+.modal-content {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+}
+.close-modal-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+}
+.modal-content h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+.form-group {
+    margin-bottom: 1rem;
+}
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-sizing: border-box; /* Important for padding */
+}
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+.modal-error {
+    color: #b91c1c;
+    margin-bottom: 1rem;
+}
+.modal-submit-btn {
+    width: 100%;
+    background-color: #f59e0b;
+    color: #111827;
+    font-weight: 700;
+    padding: 0.875rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+.modal-submit-btn:disabled {
+    background-color: #d1d5db;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .header-actions {
+        width: 100%;
+    }
+    .search-wrapper {
+        flex-grow: 1;
+    }
+    .search-wrapper input {
+        width: 100%;
+    }
+}
+
+/* --- INVENTORY 2.0 STYLES (Add to bottom of Inventory.css) --- */
+
+.price-group {
+    display: flex;
+}
+
+.currency-input {
+    width: 80px !important; /* Use important to override generic input style */
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-right: none !important;
+    background-color: #f3f4f6;
+    font-weight: 500;
+}
+
+.price-input {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
