@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './Sales.css';
-// FIX: Corrected import paths to be relative from the 'src' directory
+// FIX: Corrected import paths to be relative from the 'Pages/Dashboard' directory
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../Services/firebase';
 import { collection, onSnapshot, addDoc, doc, writeBatch } from 'firebase/firestore';
@@ -41,6 +41,7 @@ const Sales = () => {
 
     const [showReceiptModal, setShowReceiptModal] = useState(false);
     const [lastSale, setLastSale] = useState(null);
+    const [businessData, setBusinessData] = useState(null);
 
     useEffect(() => {
         if (!currentUser) return;
@@ -48,6 +49,7 @@ const Sales = () => {
 
         const productsRef = collection(db, 'businesses', currentUser.uid, 'products');
         const customersRef = collection(db, 'businesses', currentUser.uid, 'customers');
+        const businessDocRef = doc(db, 'businesses', currentUser.uid);
 
         const unsubProducts = onSnapshot(productsRef, (snapshot) => {
             setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -57,10 +59,17 @@ const Sales = () => {
             setCustomers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         });
         
+        const unsubBusiness = onSnapshot(businessDocRef, (doc) => {
+            if (doc.exists()) {
+                setBusinessData(doc.data());
+            }
+        });
+        
         setLoading(false);
         return () => {
             unsubProducts();
             unsubCustomers();
+            unsubBusiness();
         };
     }, [currentUser]);
 
@@ -132,18 +141,19 @@ const Sales = () => {
 
         try {
             const salesCollectionRef = collection(db, 'businesses', currentUser.uid, 'sales');
-            await addDoc(salesCollectionRef, saleData);
-
+            const docRef = await addDoc(salesCollectionRef, { ...saleData, createdAt: new Date(saleData.createdAt) });
+            
             const batch = writeBatch(db);
             for (const item of cart) {
                 if (item.type === 'Physical') {
                     const productRef = doc(db, 'businesses', currentUser.uid, 'products', item.id);
-                    batch.update(productRef, { quantity: item.originalQuantity - item.quantity });
+                    const newQuantity = item.originalQuantity - item.quantity;
+                    batch.update(productRef, { quantity: newQuantity });
                 }
             }
             await batch.commit();
 
-            setLastSale(saleData);
+            setLastSale({ ...saleData, id: docRef.id });
             setShowReceiptModal(true);
             setCart([]);
             setPaymentMethod('Cash');
@@ -347,7 +357,11 @@ const Sales = () => {
             </div>
 
             {showReceiptModal && lastSale && (
-                <ReceiptModal sale={lastSale} onClose={() => setShowReceiptModal(false)} />
+                <ReceiptModal 
+                    sale={lastSale} 
+                    business={businessData}
+                    onClose={() => setShowReceiptModal(false)} 
+                />
             )}
 
             {isCustomerSelectorOpen && (
@@ -395,7 +409,7 @@ const Sales = () => {
     );
 };
 
-const ReceiptModal = ({ sale, onClose }) => {
+const ReceiptModal = ({ sale, business, onClose }) => {
     const [copyButtonText, setCopyButtonText] = useState('Copy Receipt');
 
     const copyReceiptToClipboard = () => {
@@ -414,7 +428,7 @@ const ReceiptModal = ({ sale, onClose }) => {
         }
         receiptText += `--------------------\n`;
         sale.items.forEach(item => {
-            receiptText += `${item.quantity} x ${item.name} (@ ${currencies[item.currency]}${item.price.toFixed(2)} ea)\n`;
+            receiptText += `${item.quantity} x ${item.name} (@ ${currencies[item.currency]}${(item.price || 0).toFixed(2)} ea)\n`;
         });
         receiptText += `--------------------\n`;
         receiptText += `Subtotal: ${currencies[saleCurrency]}${saleSubtotal.toFixed(2)}\n`;
@@ -436,32 +450,83 @@ const ReceiptModal = ({ sale, onClose }) => {
         setTimeout(() => setCopyButtonText('Copy Receipt'), 2000);
     };
 
+    const handlePrint = () => {
+        window.print();
+    };
+
+    const saleSubtotal = sale.subtotal || 0;
+    const saleDiscountAmount = sale.discountAmount || 0;
+    const saleTotalAmount = sale.totalAmount || 0;
+    const saleCurrency = sale.currency || 'GHS';
+
     return (
-        <div className="receipt-modal-overlay">
-            <div className="receipt-modal-content">
-                <div className="receipt-header">
-                    <CheckCircleIcon />
-                    <h3>Sale Recorded!</h3>
-                </div>
-                <div className="receipt-details">
-                    <p><strong>Total:</strong> {currencies[sale.currency || 'GHS']}{(sale.totalAmount || 0).toFixed(2)}</p>
-                    <p><strong>Payment:</strong> {sale.paymentMethod}</p>
-                    {sale.customer && <p><strong>Customer:</strong> {sale.customer.name}</p>}
-                    <p><strong>Items:</strong></p>
-                    <ul>
-                        {sale.items.map((item, index) => (
-                            <li key={index}>{item.quantity} x {item.name}</li>
-                        ))}
-                    </ul>
-                </div>
-                <div className="receipt-actions">
-                    <button className="receipt-btn copy" onClick={copyReceiptToClipboard}>{copyButtonText}</button>
-                    <button className="receipt-btn new-sale" onClick={onClose}>New Sale</button>
+        <>
+            <div className="receipt-modal-overlay">
+                <div className="receipt-modal-content">
+                    <div className="receipt-header">
+                        <CheckCircleIcon />
+                        <h3>Sale Recorded!</h3>
+                    </div>
+                    <div className="receipt-details">
+                        <p><strong>Total:</strong> {currencies[saleCurrency]}{saleTotalAmount.toFixed(2)}</p>
+                        <p><strong>Payment:</strong> {sale.paymentMethod}</p>
+                        {sale.customer && <p><strong>Customer:</strong> {sale.customer.name}</p>}
+                        <p><strong>Items:</strong></p>
+                        <ul>
+                            {sale.items.map((item, index) => (
+                                <li key={index}>{item.quantity} x {item.name}</li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="receipt-actions">
+                        <button className="receipt-btn copy" onClick={copyReceiptToClipboard}>{copyButtonText}</button>
+                        <button className="receipt-btn print" onClick={handlePrint}>Print Receipt</button>
+                        <button className="receipt-btn new-sale" onClick={onClose}>New Sale</button>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <div id="printable-receipt" className="print-only">
+                <div className="print-header">
+                    <h2>{business?.businessName || 'Your Business'}</h2>
+                    <p>{business?.address || ''}</p>
+                    <p>{business?.phone || ''}</p>
+                </div>
+                <h3>Sale Receipt</h3>
+                <p><strong>Order ID:</strong> {sale.id}</p>
+                <p><strong>Date:</strong> {new Date(sale.createdAt).toLocaleString()}</p>
+                {sale.customer && <p><strong>Customer:</strong> {sale.customer.name}</p>}
+                
+                <table className="print-items-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {sale.items.map((item, index) => (
+                            <tr key={index}>
+                                <td>{item.name}</td>
+                                <td>{item.quantity}</td>
+                                <td>{(item.price || 0).toFixed(2)}</td>
+                                <td>{((item.price || 0) * item.quantity).toFixed(2)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+
+                <div className="print-totals">
+                    <p><strong>Subtotal:</strong> {currencies[saleCurrency]}{saleSubtotal.toFixed(2)}</p>
+                    <p><strong>Discount:</strong> -{currencies[saleCurrency]}{saleDiscountAmount.toFixed(2)}</p>
+                    <p className="grand-total"><strong>Total:</strong> {currencies[saleCurrency]}{saleTotalAmount.toFixed(2)}</p>
+                </div>
+                <p className="print-footer">Thank you for your business!</p>
+            </div>
+        </>
     );
 };
 
 export default Sales;
-

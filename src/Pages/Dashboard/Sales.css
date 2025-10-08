@@ -503,3 +503,87 @@
     font-weight: 700;
     cursor: pointer;
 }
+/* --- PRINT RECEIPT STYLES (Add to bottom of Sales.css) --- */
+
+/* Style for the new Print button */
+.receipt-btn.print {
+    background-color: #374151;
+    color: #fff;
+}
+.receipt-btn.print:hover {
+    background-color: #1f2937;
+}
+
+/* Initially, hide the print-only version */
+.print-only {
+    display: none;
+}
+
+/* Special styles that ONLY apply when the user prints the page */
+@media print {
+    /* Hide every single element on the page */
+    body > *:not(#printable-receipt) {
+        display: none;
+    }
+
+    /* Then, make ONLY the printable receipt and its children visible */
+    #printable-receipt, #printable-receipt * {
+        visibility: visible;
+        display: block;
+    }
+
+    /* Position the receipt at the top of the paper */
+    #printable-receipt {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 20px;
+        font-family: 'Courier New', Courier, monospace; /* Use a standard receipt font */
+        color: #000;
+        background: #fff;
+    }
+    
+    .print-header h2 { font-size: 1.5rem; margin-bottom: 0.5rem; text-align: center; }
+    .print-header p { margin: 0; font-size: 0.9rem; text-align: center; }
+    
+    #printable-receipt h3 {
+        text-align: center;
+        margin: 20px 0;
+        border-top: 1px dashed #000;
+        border-bottom: 1px dashed #000;
+        padding: 10px 0;
+    }
+
+    #printable-receipt p {
+        font-size: 0.9rem;
+    }
+
+    .print-items-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+    .print-items-table th, .print-items-table td {
+        text-align: left;
+        padding: 5px;
+        font-size: 0.9rem;
+    }
+    .print-items-table th { border-bottom: 1px solid #000; }
+    
+    .print-totals {
+        margin-top: 20px;
+        padding-top: 10px;
+        border-top: 1px dashed #000;
+        text-align: right;
+    }
+    .print-totals p { margin: 5px 0; font-size: 0.9rem;}
+    .grand-total { font-size: 1.2rem; }
+
+    .print-footer {
+        text-align: center;
+        margin-top: 20px;
+        font-style: italic;
+    }
+}
+
