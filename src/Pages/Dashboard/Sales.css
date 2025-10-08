@@ -298,3 +298,208 @@
     background-color: #e5e7eb;
     color: #1f2937;
 }
+/* --- POS UPGRADES (Add to bottom of Sales.css) --- */
+
+.checkout-calculations {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.calc-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #4b5563;
+}
+
+.calc-group input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.discount-group {
+    display: flex;
+}
+
+.discount-input {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.discount-type-selector {
+    width: 60px;
+    border: 1px solid #d1d5db;
+    border-left: none;
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    background-color: #f3f4f6;
+    font-weight: 600;
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1rem;
+    color: #4b5563;
+    margin-bottom: 0.75rem;
+}
+.summary-line.change-due {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: #166534; /* Green for positive change */
+    padding-top: 0.75rem;
+    border-top: 1px dashed #d1d5db;
+}
+/* --- POS CUSTOMER INTEGRATION (Add to bottom of Sales.css) --- */
+
+.customer-selector-container {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.add-customer-to-sale-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px dashed #d1d5db;
+    border-radius: 0.5rem;
+    background-color: #f9fafb;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.add-customer-to-sale-btn:hover {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+}
+.add-customer-to-sale-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.selected-customer-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #dbeafe;
+    color: #1e40af;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+}
+.selected-customer-display button {
+    background: none;
+    border: none;
+    font-weight: 700;
+    color: #1e40af;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* Customer Selector Modal */
+.customer-selector-modal {
+    max-width: 450px;
+}
+.customer-selector-modal .search-wrapper {
+    margin-bottom: 1.5rem;
+}
+.customer-selector-modal .search-wrapper input {
+    width: 100%;
+}
+.customer-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 40vh;
+    overflow-y: auto;
+}
+.customer-list li {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.customer-list li:hover {
+    background-color: #f3f4f6;
+}
+.customer-name {
+    font-weight: 600;
+}
+.customer-phone {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+.no-results {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+}
+/* --- QUICK ADD CUSTOMER STYLES (Add to bottom of Sales.css) --- */
+
+.quick-add-customer-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background-color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.quick-add-customer-btn:hover {
+    background-color: #f9fafb;
+}
+.quick-add-customer-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.quick-add-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.back-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.save-customer-btn {
+    background-color: #f59e0b;
+    color: #111827;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+}
