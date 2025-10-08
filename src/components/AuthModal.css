@@ -12,18 +12,28 @@
     z-index: 1000;
     backdrop-filter: blur(4px);
     animation: fadeIn 0.3s ease;
+    padding: 1rem;
 }
 
+/* UPDATE: Default width is now wider for the signup form */
 .auth-modal-content {
     background-color: #fff;
     padding: 2.5rem;
     border-radius: 1rem;
     width: 100%;
-    max-width: 420px;
+    max-width: 768px; /* Increased width for two-column layout */
     position: relative;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     animation: slideUp 0.4s ease;
+    max-height: 90vh;
+    overflow-y: auto;
 }
+
+/* UPDATE: Special class to make login/reset views narrower */
+.auth-modal-content.login-view {
+    max-width: 420px;
+}
+
 
 @keyframes fadeIn {
     from { opacity: 0; }
@@ -108,6 +118,18 @@
     font-weight: 500;
 }
 
+/* --- NEW: Signup Grid Layout --- */
+.signup-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    text-align: left;
+}
+
+.signup-grid .input-group.full-width {
+    grid-column: 1 / -1;
+}
+
 /* --- Form Elements --- */
 .input-group {
     text-align: left;
@@ -125,6 +147,7 @@
     border: 1px solid #d1d5db;
     border-radius: 0.5rem;
     font-size: 1rem;
+    box-sizing: border-box;
 }
 .input-group input:focus {
     outline: none;
@@ -143,6 +166,7 @@
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.2s;
+    margin-top: 1rem;
 }
 .auth-submit-btn:hover {
     background-color: #fbbf24;
@@ -198,84 +222,18 @@
 
 
 /* --- Responsive Styles --- */
-@media (max-width: 480px) {
-    .auth-modal-content {
-        padding: 2rem 1.5rem;
-        height: 100%;
-        width: 100%;
-        max-width: 100%;
-        border-radius: 0;
+@media (max-width: 767px) {
+    .signup-grid {
+        grid-template-columns: 1fr;
     }
-}
-/* --- MOBILE POLISH (Add to bottom of AuthModal.css) --- */
-@media (max-width: 480px) {
-    .auth-modal-content {
-        /* This increases side padding and ensures it works correctly */
-        padding: 2rem 1.5rem;
-        box-sizing: border-box;
+    .signup-grid .input-group.full-width {
+        grid-column: auto;
     }
-}
-/* --- PASSWORD REVEAL ICON STYLES --- */
-.password-input-wrapper {
-    position: relative;
-}
-
-.password-toggle-icon {
-    position: absolute;
-    top: 50%;
-    right: 1rem;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-    cursor: pointer;
-    color: #6b7280;
-    display: flex;
-    align-items: center;
-}
-
-.password-toggle-icon svg {
-    width: 20px;
-    height: 20px;
-}
-
-/* --- MOBILE POLISH V2 --- */
-@media (max-width: 480px) {
     .auth-modal-content {
-        /* Prevents it from being full screen */
-        width: 90%;
-        height: auto;
-        max-height: 90vh; /* Prevents it from being too tall */
-        border-radius: 1rem; /* Re-apply border radius for card look */
-        overflow-y: auto; /* Add scroll if content is too long */
+        max-width: 420px;
     }
-
-    /* Prevents iOS from zooming in on input fields */
     .input-group input {
-        font-size: 16px;
+        font-size: 16px; /* Prevents iOS zoom */
     }
 }
 
-/* --- MOBILE STYLING (Add to bottom of AuthModal.css) --- */
-
-@media (max-width: 480px) {
-    .auth-modal-content {
-        /* This turns the modal into a stable card instead of a full-screen view */
-        width: 90%;
-        height: auto; /* Height adjusts to content, doesn't fill screen */
-        max-height: 90vh; /* Prevents it from being too tall on any screen */
-        border-radius: 1rem; /* Re-applies the rounded corners for a card look */
-        overflow-y: auto; /* Adds scrolling if the content is too long for the screen */
-        padding: 2rem 1.5rem;
-        box-sizing: border-box;
-
-        /* This ensures the slide-up animation still works correctly */
-        animation: slideUp 0.4s ease;
-    }
-
-    /* This prevents iOS from zooming in on input fields, which causes layout shifts */
-    .input-group input {
-        font-size: 16px;
-    }
-}

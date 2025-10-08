@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// FIX: The CSS file is in the parent 'src' directory, not the 'components' folder.
 import './AuthModal.css';
-// FIX: Corrected path to go up one level from 'components' to 'src', then into 'Services'.
 import { auth, db } from '../Services/firebase';
 import { 
     createUserWithEmailAndPassword, 
@@ -30,23 +28,20 @@ const XIcon = () => (
 );
 
 const AuthModal = ({ closeModal, initialView }) => {
-    const [view, setView] = useState(initialView); // 'login', 'signup', 'reset', 'verify', 'reset_sent'
+    const [view, setView] = useState(initialView);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    // --- Form State ---
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     
-    // UPDATE: Added state for all new business fields
     const [businessName, setBusinessName] = useState('');
     const [ownerName, setOwnerName] = useState('');
     const [businessType, setBusinessType] = useState('');
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
-
 
     useEffect(() => {
         setView(initialView);
@@ -64,13 +59,11 @@ const AuthModal = ({ closeModal, initialView }) => {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            // UPDATE: Send verification email
             await sendEmailVerification(user);
 
             const trialEndDate = new Date();
             trialEndDate.setDate(trialEndDate.getDate() + 30);
 
-            // UPDATE: Saving to 'businesses' collection with the user's UID as the document ID
             await setDoc(doc(db, "businesses", user.uid), {
                 ownerUid: user.uid,
                 businessName: businessName,
@@ -78,13 +71,13 @@ const AuthModal = ({ closeModal, initialView }) => {
                 businessType: businessType,
                 phone: phone,
                 address: address,
-                email: user.email, // Use the verified email from auth
+                email: user.email,
                 createdAt: Timestamp.fromDate(new Date()),
-                plan: "trialing", // Set plan to 'trialing'
+                plan: "trialing",
                 trialEndsAt: Timestamp.fromDate(trialEndDate)
             });
             
-            setView('verify'); // Show the "verify email" message
+            setView('verify');
 
         } catch (err) {
             setError(err.message.replace('Firebase: ', ''));
@@ -126,20 +119,17 @@ const AuthModal = ({ closeModal, initialView }) => {
             const businessDocRef = doc(db, "businesses", user.uid);
             const businessDoc = await getDoc(businessDocRef);
 
-            // Create a business profile only if it's their first time signing in
             if (!businessDoc.exists()) {
                 const trialEndDate = new Date();
                 trialEndDate.setDate(trialEndDate.getDate() + 30);
                 await setDoc(businessDocRef, {
                     ownerUid: user.uid,
-                    // For Google sign-in, we use their display name as a default for both fields
                     businessName: user.displayName, 
                     ownerName: user.displayName,
                     email: user.email,
                     createdAt: Timestamp.fromDate(new Date()),
                     plan: "trialing",
                     trialEndsAt: Timestamp.fromDate(trialEndDate),
-                    // These fields will be empty, can be prompted in a "complete your profile" step later
                     businessType: '',
                     phone: '',
                     address: '',
@@ -239,7 +229,8 @@ const AuthModal = ({ closeModal, initialView }) => {
 
                         <form onSubmit={isLoginView ? handleLogin : handleSignup}>
                             {!isLoginView && (
-                                <>
+                                // UPDATE: Wrapped business fields in a div for grid layout
+                                <div className="signup-grid">
                                     <div className="input-group">
                                         <label htmlFor="businessName">Business Name</label>
                                         <input type="text" id="businessName" value={businessName} onChange={(e) => setBusinessName(e.target.value)} required />
@@ -249,18 +240,19 @@ const AuthModal = ({ closeModal, initialView }) => {
                                         <input type="text" id="ownerName" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} required />
                                     </div>
                                      <div className="input-group">
-                                        <label htmlFor="businessType">Business Type (e.g., Fashion, Electronics)</label>
+                                        <label htmlFor="businessType">Business Type</label>
                                         <input type="text" id="businessType" value={businessType} onChange={(e) => setBusinessType(e.target.value)} required />
                                     </div>
                                      <div className="input-group">
                                         <label htmlFor="phone">Phone Number</label>
                                         <input type="tel" id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} required />
                                     </div>
-                                      <div className="input-group">
+                                    {/* UPDATE: Added 'full-width' class for address to span two columns */}
+                                    <div className="input-group full-width">
                                         <label htmlFor="address">Address</label>
                                         <input type="text" id="address" value={address} onChange={(e) => setAddress(e.target.value)} required />
                                     </div>
-                                </>
+                                </div>
                             )}
                             <div className="input-group">
                                 <label htmlFor="email">Email</label>
@@ -306,4 +298,3 @@ const AuthModal = ({ closeModal, initialView }) => {
 };
 
 export default AuthModal;
-
