@@ -237,3 +237,12 @@
     }
 }
 
+/* --- AUTH MODAL MOBILE CENTERING FIX (Add to bottom of AuthModal.css) --- */
+
+@media (max-width: 767px) {
+  .auth-modal-overlay {
+    /* Removing the padding allows the flexbox container to use the
+       full width of the screen to perfectly center the modal. */
+    padding: 0 1rem;
+  }
+}
