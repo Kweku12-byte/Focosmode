@@ -6,7 +6,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap; /* Allow wrapping on small screens */
+    flex-wrap: wrap; 
     gap: 1rem;
     margin-bottom: 2rem;
 }
@@ -188,7 +188,7 @@
     background-color: rgba(17, 24, 39, 0.6);
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Aligns to top for scrolling */
+    align-items: flex-start;
     padding-top: 5vh;
     z-index: 1000;
     backdrop-filter: blur(4px);
@@ -231,7 +231,7 @@
     border: 1px solid #d1d5db;
     border-radius: 0.5rem;
     font-size: 1rem;
-    box-sizing: border-box; /* Important for padding */
+    box-sizing: border-box;
 }
 .form-group textarea {
     min-height: 100px;
@@ -257,26 +257,12 @@
     cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
-    .header-actions {
-        width: 100%;
-    }
-    .search-wrapper {
-        flex-grow: 1;
-    }
-    .search-wrapper input {
-        width: 100%;
-    }
-}
-
-/* --- INVENTORY 2.0 STYLES (Add to bottom of Inventory.css) --- */
-
 .price-group {
     display: flex;
 }
 
 .currency-input {
-    width: 80px !important; /* Use important to override generic input style */
+    width: 80px !important;
     border-top-right-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
     border-right: none !important;
@@ -288,3 +274,27 @@
     border-top-left-radius: 0 !important;
     border-bottom-left-radius: 0 !important;
 }
+
+/* UPDATE: Added Responsive styles for mobile */
+@media (max-width: 768px) {
+    .inventory-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .header-actions {
+        width: 100%;
+        flex-direction: column-reverse; /* Puts 'Add' button on top */
+    }
+    .search-wrapper {
+        flex-grow: 1;
+        width: 100%;
+    }
+    .search-wrapper input {
+        width: 100%;
+    }
+    .add-product-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
