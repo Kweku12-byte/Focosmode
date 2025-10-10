@@ -103,7 +103,7 @@
 }
 
 .mobile-sidebar-toggle {
-    display: none; /* Hidden on desktop */
+    display: none;
     background: none;
     border: 1px solid #e5e7eb;
     padding: 0.5rem;
@@ -137,56 +137,68 @@
     color: #b91c1c;
 }
 
+/* --- NEW: Sidebar Overlay for Mobile --- */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.sidebar-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+
 /* --- Responsive Styles --- */
 @media (max-width: 768px) {
     .dashboard-layout {
-        grid-template-columns: 1fr; /* Single column layout on mobile */
+        grid-template-columns: 1fr;
     }
     
     .dashboard-sidebar {
         position: fixed;
         top: 0;
-        left: -100%; /* Hidden by default */
+        left: -100%;
         width: 280px;
         height: 100%;
         z-index: 1001;
         transition: left 0.3s ease-in-out;
         box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        border-right: none;
     }
 
     .dashboard-sidebar.open {
-        left: 0; /* Visible when open */
+        left: 0;
     }
-
-    .mobile-sidebar-toggle {
-        display: block; /* Show the hamburger menu button */
+    
+    .dashboard-main-content {
+        padding-top: 6rem; /* Make space for the sticky header */
     }
 
     .dashboard-header {
-        /* FIX: This is the key change. It correctly positions the hamburger 
-           on the left and the user's name on the right. */
-        justify-content: space-between; 
-        flex-direction: row; /* Ensure default direction */
+        /* Make header fixed at the top */
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        background-color: #ffffff;
+        padding: 1rem 1.5rem;
+        margin-bottom: 0;
+        justify-content: space-between; /* Space between hamburger and name */
+        flex-direction: row; /* Reset direction to normal */
+    }
+
+    .mobile-sidebar-toggle {
+        display: block;
     }
 }
 
-/* --- Placeholder View Styles --- */
-/* These styles are for the mock components and can be removed in your final app */
-.placeholder-view {
-    background-color: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.75rem;
-    padding: 2rem;
-    text-align: center;
-}
-
-.placeholder-view h2 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #111827;
-    margin-bottom: 0.5rem;
-}
-
-.placeholder-view p {
-    color: #6b7280;
-}
