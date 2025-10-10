@@ -163,8 +163,30 @@
     }
 
     .dashboard-header {
-        /* On mobile, the toggle is on the left, name on the right */
-        justify-content: flex-end; 
-        flex-direction: row-reverse;
+        /* FIX: This is the key change. It correctly positions the hamburger 
+           on the left and the user's name on the right. */
+        justify-content: space-between; 
+        flex-direction: row; /* Ensure default direction */
     }
+}
+
+/* --- Placeholder View Styles --- */
+/* These styles are for the mock components and can be removed in your final app */
+.placeholder-view {
+    background-color: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    text-align: center;
+}
+
+.placeholder-view h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.5rem;
+}
+
+.placeholder-view p {
+    color: #6b7280;
 }
