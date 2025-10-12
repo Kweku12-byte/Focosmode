@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './FocosmodeDashboard.css';
-// FIX: Corrected import paths to go up one level from the 'Dashboard' directory
+// FIX: Corrected import paths to be relative from the 'src' directory
 import { useAuth } from '../../context/AuthContext';
 import { db, auth } from '../../Services/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
@@ -21,6 +21,7 @@ const CustomersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" 
 const HistoryIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 const LogoutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>;
 const MenuIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg>;
+const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>;
 
 
 const FocosmodeDashboard = () => {
@@ -31,20 +32,19 @@ const FocosmodeDashboard = () => {
     const [error, setError] = useState('');
     const [activeView, setActiveView] = useState('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+    const [openMenu, setOpenMenu] = useState('home');
 
     useEffect(() => {
         if (!currentUser) {
             setLoading(false);
             return;
         }
-
         const docRef = doc(db, 'businesses', currentUser.uid);
         const unsubscribe = onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
                 setBusinessData(docSnap.data());
             } else {
-                setError("Could not find your business profile. Please contact support.");
+                setError("Could not find your business profile.");
             }
             setLoading(false);
         }, (err) => {
@@ -52,7 +52,6 @@ const FocosmodeDashboard = () => {
             setError("Failed to load business data.");
             setLoading(false);
         });
-
         return () => unsubscribe();
     }, [currentUser]);
 
@@ -70,64 +69,81 @@ const FocosmodeDashboard = () => {
             case 'dashboard':
                 return (
                     <div>
-                        <h1>Welcome, {businessData?.businessName || '...'}!</h1>
-                        <p>This is your main dashboard. Key metrics will appear here.</p>
+                        <h1>Dashboard Command Center</h1>
+                        <p>This is where your new KPI cards and charts will go.</p>
                     </div>
                 );
-            case 'inventory':
-                return <Inventory />;
-            case 'sales':
-                return <Sales />;
-            case 'customers':
-                return <Customers />;
-            case 'history':
-                return <SalesHistory />;
-            default:
-                return <div><h1>Welcome!</h1></div>;
+            case 'inventory-all': return <Inventory />;
+            case 'sales-pos': return <Sales />;
+            case 'customers-all': return <Customers />;
+            case 'sales-history': return <SalesHistory />;
+            default: return <div><h1>Welcome!</h1></div>;
         }
     };
 
-    if (loading) {
-        return <div className="dashboard-loader">Loading Your Dashboard...</div>;
-    }
-
-    if (error) {
-        return <div className="dashboard-error">Error: {error}</div>;
-    }
-
-    const NavButton = ({ view, label, icon: Icon }) => (
-        <button 
-            className={`nav-button ${activeView === view ? 'active' : ''}`}
-            onClick={() => {
-                setActiveView(view);
-                setIsSidebarOpen(false);
-            }}
-        >
-            <Icon />
+    if (loading) { return <div className="dashboard-loader">Loading Your Dashboard...</div>; }
+    if (error) { return <div className="dashboard-error">Error: {error}</div>; }
+    
+    const NavItem = ({ view, label, icon: Icon }) => (
+        <button className={`nav-button ${activeView === view ? 'active' : ''}`} onClick={() => { setActiveView(view); setIsSidebarOpen(false); }}>
+            {Icon && <Icon />}
             <span>{label}</span>
         </button>
     );
 
+    const AccordionItem = ({ title, menuKey, icon: Icon, children }) => (
+        <div className="accordion-item">
+            <button className={`accordion-header ${openMenu === menuKey ? 'open' : ''}`} onClick={() => setOpenMenu(openMenu === menuKey ? null : menuKey)}>
+                <div className="accordion-title">
+                    <Icon /><span>{title}</span>
+                </div>
+                <ChevronDownIcon />
+            </button>
+            <div className={`accordion-content ${openMenu === menuKey ? 'open' : ''}`}>
+                {children}
+            </div>
+        </div>
+    );
+
     return (
         <div className="dashboard-layout">
+            <div className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)}></div>
+            
             <div className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
                 <div className="sidebar-header">
-                     <a href="/" className="sidebar-logo">
+                    <button className="sidebar-logo" onClick={() => { setActiveView('dashboard'); setIsSidebarOpen(false); }}>
                         <img src="/logo192.png" alt="Focosmode Logo"/>
                         <span>Focosmode</span>
-                    </a>
+                    </button>
                 </div>
-                <nav className="sidebar-nav">
-                    <NavButton view="dashboard" label="Dashboard" icon={DashboardIcon} />
-                    <NavButton view="inventory" label="Inventory" icon={InventoryIcon} />
-                    <NavButton view="sales" label="Sales" icon={SalesIcon} />
-                    <NavButton view="customers" label="Customers" icon={CustomersIcon} />
-                    <NavButton view="history" label="Sales History" icon={HistoryIcon} />
+                
+                <nav className="sidebar-nav-scrollable">
+                    <NavItem view="dashboard" label="Dashboard" icon={DashboardIcon} />
+                    
+                    <AccordionItem title="Sales" menuKey="sales" icon={SalesIcon}>
+                        <NavItem view="sales-pos" label="New Sale (POS)" />
+                        <NavItem view="sales-history" label="Sales History" />
+                    </AccordionItem>
+
+                    <AccordionItem title="Inventory" menuKey="inventory" icon={InventoryIcon}>
+                        <NavItem view="inventory-all" label="All Products" />
+                    </AccordionItem>
+
+                     <AccordionItem title="Customers" menuKey="customers" icon={CustomersIcon}>
+                        <NavItem view="customers-all" label="All Customers" />
+                    </AccordionItem>
                 </nav>
+                
                 <div className="sidebar-footer">
+                    <div className="user-profile">
+                         <div className="user-avatar">{businessData?.ownerName?.charAt(0)}</div>
+                         <div className="user-info">
+                            <span className="user-name">{businessData?.ownerName || '...'}</span>
+                            <span className="user-email">{currentUser?.email}</span>
+                         </div>
+                    </div>
                     <button className="nav-button logout" onClick={handleLogout}>
                         <LogoutIcon />
-                        <span>Logout</span>
                     </button>
                 </div>
             </div>
@@ -148,3 +164,4 @@ const FocosmodeDashboard = () => {
 };
 
 export default FocosmodeDashboard;
+

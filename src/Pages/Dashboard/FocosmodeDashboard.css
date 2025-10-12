@@ -24,6 +24,10 @@
     align-items: center;
     gap: 0.75rem;
     text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
 }
 
 .sidebar-logo img {
@@ -37,11 +41,12 @@
     color: #111827;
 }
 
-.sidebar-nav {
+.sidebar-nav-scrollable {
+    overflow-y: auto;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    flex-grow: 1;
 }
 
 .nav-button {
@@ -58,6 +63,7 @@
     font-weight: 600;
     color: #4b5563;
     transition: all 0.2s ease;
+    width: 100%;
 }
 
 .nav-button:hover {
@@ -73,15 +79,111 @@
 .nav-button svg {
     width: 24px;
     height: 24px;
+    flex-shrink: 0;
+}
+
+.sidebar-footer {
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    overflow: hidden;
+}
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f59e0b;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.user-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.user-name {
+    font-weight: 600;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.user-email {
+    font-size: 0.875rem;
+    color: #6b7280;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .nav-button.logout {
+    padding: 0.5rem;
+    width: auto;
     color: #6b7280;
 }
 .nav-button.logout:hover {
-    color: #ef4444; /* Red for logout */
+    color: #ef4444;
     background-color: #fee2e2;
 }
+.nav-button.logout span {
+    display: none; /* Hide text on desktop */
+}
+
+
+/* --- Accordion Menu Styles --- */
+.accordion-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+}
+.accordion-header .accordion-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+.accordion-header svg {
+    width: 24px;
+    height: 24px;
+    color: #9ca3af;
+    transition: transform 0.3s ease;
+}
+.accordion-header.open svg:last-child {
+    transform: rotate(180deg);
+}
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+    padding-left: 2rem;
+}
+.accordion-content.open {
+    max-height: 500px; /* Adjust if you have many sub-items */
+}
+.accordion-content .nav-button {
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+}
+
 
 /* --- Main Content Area --- */
 .dashboard-main-content {
@@ -92,7 +194,7 @@
 .dashboard-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end; /* Align to the right on desktop */
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid #e5e7eb;
@@ -191,15 +293,14 @@
         flex-direction: row;
     }
 
-    /* UPDATE: Hamburger Button Styling */
     .mobile-sidebar-toggle {
         display: block;
-        background-color: #f59e0b; /* Brand yellow */
+        background-color: #f59e0b;
         border: none;
         padding: 0.6rem;
         border-radius: 0.5rem;
         cursor: pointer;
-        color: #111827; /* Dark color for the icon strokes */
+        color: #111827;
     }
     .mobile-sidebar-toggle svg {
         width: 24px;
