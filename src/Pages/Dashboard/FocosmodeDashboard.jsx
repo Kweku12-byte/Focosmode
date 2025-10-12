@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './FocosmodeDashboard.css';
-// FIX: Corrected import paths to be relative from the 'src' directory
+// FIX: Corrected import paths to go up two levels from the Dashboard folder
 import { useAuth } from '../../context/AuthContext';
 import { db, auth } from '../../Services/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
@@ -32,7 +32,14 @@ const FocosmodeDashboard = () => {
     const [error, setError] = useState('');
     const [activeView, setActiveView] = useState('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [openMenu, setOpenMenu] = useState('home');
+    const [openMenus, setOpenMenus] = useState({});
+
+    const toggleMenu = (menuKey) => {
+        setOpenMenus(prevMenus => ({
+            ...prevMenus,
+            [menuKey]: !prevMenus[menuKey]
+        }));
+    };
 
     useEffect(() => {
         if (!currentUser) {
@@ -93,13 +100,13 @@ const FocosmodeDashboard = () => {
 
     const AccordionItem = ({ title, menuKey, icon: Icon, children }) => (
         <div className="accordion-item">
-            <button className={`accordion-header ${openMenu === menuKey ? 'open' : ''}`} onClick={() => setOpenMenu(openMenu === menuKey ? null : menuKey)}>
+            <button className={`accordion-header ${openMenus[menuKey] ? 'open' : ''}`} onClick={() => toggleMenu(menuKey)}>
                 <div className="accordion-title">
                     <Icon /><span>{title}</span>
                 </div>
                 <ChevronDownIcon />
             </button>
-            <div className={`accordion-content ${openMenu === menuKey ? 'open' : ''}`}>
+            <div className={`accordion-content ${openMenus[menuKey] ? 'open' : ''}`}>
                 {children}
             </div>
         </div>
