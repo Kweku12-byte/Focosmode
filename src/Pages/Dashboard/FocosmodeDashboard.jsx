@@ -12,6 +12,8 @@ import Inventory from './Inventory';
 import Sales from './Sales';
 import Customers from './Customers';
 import SalesHistory from './SalesHistory';
+// UPDATE: Import the new MainDashboard component
+import MainDashboard from './MainDashboard';
 
 // --- Icon Components (for the sidebar) ---
 const DashboardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
@@ -74,12 +76,8 @@ const FocosmodeDashboard = () => {
     const renderActiveView = () => {
         switch (activeView) {
             case 'dashboard':
-                return (
-                    <div>
-                        <h1>Dashboard Command Center</h1>
-                        <p>This is where your new KPI cards and charts will go.</p>
-                    </div>
-                );
+                // UPDATE: Render the new MainDashboard component
+                return <MainDashboard />;
             case 'inventory-all': return <Inventory />;
             case 'sales-pos': return <Sales />;
             case 'customers-all': return <Customers />;
@@ -171,4 +169,3 @@ const FocosmodeDashboard = () => {
 };
 
 export default FocosmodeDashboard;
-
