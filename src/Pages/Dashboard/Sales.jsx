@@ -1,20 +1,21 @@
+// src/Pages/Dashboard/Sales.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import './Sales.css';
-// FIX: Corrected import paths to be relative from the 'Pages/Dashboard' directory
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../Services/firebase';
 import { collection, onSnapshot, addDoc, doc, writeBatch } from 'firebase/firestore';
+
+// --- NEW: Import the extracted Receipt component ---
+import ReceiptModal from './ReceiptModal';
 
 // --- Icon Components ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>;
 const MinusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" /></svg>;
 const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>;
 const SearchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>;
-const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 const UserAddIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>;
 const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
 const ArrowLeftIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>;
-
 
 const currencies = { 'GHS': '₵', 'NGN': '₦', 'USD': '$', 'GBP': '£', 'EUR': '€' };
 
@@ -135,7 +136,7 @@ const Sales = () => {
             changeDue,
             currency: cart[0]?.currency || 'GHS',
             paymentMethod,
-            createdAt: new Date(),
+            createdAt: new Date().toISOString(), // Best practice: store dates as ISO strings or Firestore Timestamps
             customer: selectedCustomer ? { id: selectedCustomer.id, name: selectedCustomer.name } : null,
         };
 
@@ -356,11 +357,13 @@ const Sales = () => {
                 </div>
             </div>
 
+            {/* --- UPDATE: Passing currencies to ReceiptModal --- */}
             {showReceiptModal && lastSale && (
                 <ReceiptModal 
                     sale={lastSale} 
                     business={businessData}
                     onClose={() => setShowReceiptModal(false)} 
+                    currencies={currencies}
                 />
             )}
 
@@ -406,126 +409,6 @@ const Sales = () => {
                 </div>
             )}
         </div>
-    );
-};
-
-const ReceiptModal = ({ sale, business, onClose }) => {
-    const [copyButtonText, setCopyButtonText] = useState('Copy Receipt');
-
-    const copyReceiptToClipboard = () => {
-        const saleSubtotal = sale.subtotal || 0;
-        const saleDiscountAmount = sale.discountAmount || 0;
-        const saleTotalAmount = sale.totalAmount || 0;
-        const saleTenderedAmount = sale.tenderedAmount || 0;
-        const saleChangeDue = sale.changeDue || 0;
-        const saleCurrency = sale.currency || 'GHS';
-
-        let receiptText = `*SALE RECEIPT*\n\n`;
-        receiptText += `Date: ${new Date(sale.createdAt).toLocaleString()}\n`;
-        receiptText += `Payment Method: ${sale.paymentMethod}\n`;
-        if (sale.customer) {
-            receiptText += `Customer: ${sale.customer.name}\n`;
-        }
-        receiptText += `--------------------\n`;
-        sale.items.forEach(item => {
-            receiptText += `${item.quantity} x ${item.name} (@ ${currencies[item.currency]}${(item.price || 0).toFixed(2)} ea)\n`;
-        });
-        receiptText += `--------------------\n`;
-        receiptText += `Subtotal: ${currencies[saleCurrency]}${saleSubtotal.toFixed(2)}\n`;
-        receiptText += `Discount: -${currencies[saleCurrency]}${saleDiscountAmount.toFixed(2)}\n`;
-        receiptText += `*TOTAL: ${currencies[saleCurrency]}${saleTotalAmount.toFixed(2)}*\n\n`;
-        if (saleTenderedAmount > 0) {
-             receiptText += `Tendered: ${currencies[saleCurrency]}${saleTenderedAmount.toFixed(2)}\n`;
-             receiptText += `Change: ${currencies[saleCurrency]}${saleChangeDue.toFixed(2)}\n`;
-        }
-
-        const textArea = document.createElement('textarea');
-        textArea.value = receiptText;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-
-        setCopyButtonText('Copied!');
-        setTimeout(() => setCopyButtonText('Copy Receipt'), 2000);
-    };
-
-    const handlePrint = () => {
-        window.print();
-    };
-
-    const saleSubtotal = sale.subtotal || 0;
-    const saleDiscountAmount = sale.discountAmount || 0;
-    const saleTotalAmount = sale.totalAmount || 0;
-    const saleCurrency = sale.currency || 'GHS';
-
-    return (
-        <>
-            <div className="receipt-modal-overlay">
-                <div className="receipt-modal-content">
-                    <div className="receipt-header">
-                        <CheckCircleIcon />
-                        <h3>Sale Recorded!</h3>
-                    </div>
-                    <div className="receipt-details">
-                        <p><strong>Total:</strong> {currencies[saleCurrency]}{saleTotalAmount.toFixed(2)}</p>
-                        <p><strong>Payment:</strong> {sale.paymentMethod}</p>
-                        {sale.customer && <p><strong>Customer:</strong> {sale.customer.name}</p>}
-                        <p><strong>Items:</strong></p>
-                        <ul>
-                            {sale.items.map((item, index) => (
-                                <li key={index}>{item.quantity} x {item.name}</li>
-                            ))}
-                        </ul>
-                    </div>
-                    <div className="receipt-actions">
-                        <button className="receipt-btn copy" onClick={copyReceiptToClipboard}>{copyButtonText}</button>
-                        <button className="receipt-btn print" onClick={handlePrint}>Print Receipt</button>
-                        <button className="receipt-btn new-sale" onClick={onClose}>New Sale</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="printable-receipt" className="print-only">
-                <div className="print-header">
-                    <h2>{business?.businessName || 'Your Business'}</h2>
-                    <p>{business?.address || ''}</p>
-                    <p>{business?.phone || ''}</p>
-                </div>
-                <h3>Sale Receipt</h3>
-                <p><strong>Order ID:</strong> {sale.id}</p>
-                <p><strong>Date:</strong> {new Date(sale.createdAt).toLocaleString()}</p>
-                {sale.customer && <p><strong>Customer:</strong> {sale.customer.name}</p>}
-                
-                <table className="print-items-table">
-                    <thead>
-                        <tr>
-                            <th>Item</th>
-                            <th>Qty</th>
-                            <th>Price</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {sale.items.map((item, index) => (
-                            <tr key={index}>
-                                <td>{item.name}</td>
-                                <td>{item.quantity}</td>
-                                <td>{(item.price || 0).toFixed(2)}</td>
-                                <td>{((item.price || 0) * item.quantity).toFixed(2)}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-
-                <div className="print-totals">
-                    <p><strong>Subtotal:</strong> {currencies[saleCurrency]}{saleSubtotal.toFixed(2)}</p>
-                    <p><strong>Discount:</strong> -{currencies[saleCurrency]}{saleDiscountAmount.toFixed(2)}</p>
-                    <p className="grand-total"><strong>Total:</strong> {currencies[saleCurrency]}{saleTotalAmount.toFixed(2)}</p>
-                </div>
-                <p className="print-footer">Thank you for your business!</p>
-            </div>
-        </>
     );
 };
 

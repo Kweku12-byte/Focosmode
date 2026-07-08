@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+// src/Pages/Dashboard/MainDashboard.jsx
+import React, { useState, useEffect } from 'react';
 import './MainDashboard.css';
-// FIX: Corrected import paths to go up two directories from the Dashboard folder
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../Services/firebase';
 import { collection, onSnapshot, query, where, Timestamp } from 'firebase/firestore';
 import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+// --- UPDATE: Added Filler plugin ---
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+// --- UPDATE: Registered Filler plugin ---
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 // --- Icon Components for KPIs ---
 const ProductIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>;
@@ -18,13 +20,12 @@ const MainDashboard = () => {
     const { currentUser } = useAuth();
     const [kpiData, setKpiData] = useState({ products: 0, customers: 0, revenue: 0 });
     const [chartData, setChartData] = useState({ labels: [], datasets: [] });
-    const [timeFilter, setTimeFilter] = useState(30); // Default to last 30 days
+    const [timeFilter, setTimeFilter] = useState(30); 
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!currentUser) return;
 
-        // --- Fetch data for KPIs ---
         const productsRef = collection(db, 'businesses', currentUser.uid, 'products');
         const customersRef = collection(db, 'businesses', currentUser.uid, 'customers');
         const salesRef = collection(db, 'businesses', currentUser.uid, 'sales');
@@ -32,7 +33,6 @@ const MainDashboard = () => {
         const unsubProducts = onSnapshot(productsRef, snapshot => setKpiData(prev => ({ ...prev, products: snapshot.size })));
         const unsubCustomers = onSnapshot(customersRef, snapshot => setKpiData(prev => ({ ...prev, customers: snapshot.size })));
 
-        // --- Fetch and process data for Chart and Revenue KPI ---
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - timeFilter);
         const salesQuery = query(salesRef, where('createdAt', '>=', Timestamp.fromDate(startDate)));
@@ -40,16 +40,14 @@ const MainDashboard = () => {
         const unsubSales = onSnapshot(salesQuery, (snapshot) => {
             const sales = snapshot.docs.map(doc => ({...doc.data(), createdAt: doc.data().createdAt.toDate()}));
             
-            // Calculate total revenue for the period
             const totalRevenue = sales.reduce((acc, sale) => acc + (sale.totalAmount || 0), 0);
             setKpiData(prev => ({...prev, revenue: totalRevenue}));
 
-            // Aggregate sales by day for the chart
             const salesByDay = {};
             for (let i = 0; i < timeFilter; i++) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
-                const dateString = date.toISOString().split('T')[0]; // YYYY-MM-DD
+                const dateString = date.toISOString().split('T')[0];
                 salesByDay[dateString] = 0;
             }
 
@@ -135,4 +133,5 @@ const MainDashboard = () => {
 };
 
 export default MainDashboard;
+
 

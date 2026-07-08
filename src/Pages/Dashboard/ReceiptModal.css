@@ -1,0 +1,146 @@
+/* src/Pages/Dashboard/ReceiptModal.css */
+
+/* Hide print layout on screens */
+.print-only {
+    display: none;
+}
+
+/* Modal Styling for Screen */
+.receipt-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 1000;
+}
+.receipt-modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+}
+.receipt-header {
+    color: #10b981;
+    margin-bottom: 1rem;
+}
+.receipt-header svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.5rem;
+}
+.receipt-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+.receipt-btn {
+    padding: 0.75rem;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-weight: 600;
+}
+.receipt-btn.print { background: #1f2937; color: white; }
+.receipt-btn.copy { background: #f3f4f6; color: #1f2937; }
+.receipt-btn.new-sale { background: #f59e0b; color: white; }
+
+/* =========================================
+   THE AGGRESSIVE PRINT MAGIC V2 (POS Style)
+   ========================================= */
+@media print {
+    /* 1. Hide the UI elements */
+    .dashboard-sidebar, .dashboard-header, .pos-header, .product-grid,
+    .cart-summary, .search-wrapper, .mobile-sidebar-toggle, .screen-only {
+        display: none !important;
+    }
+
+    /* 2. Strip container limits */
+    html, body, #root, .App, .dashboard-layout, .dashboard-main-content, .dashboard-view-container, .pos-layout {
+        display: block !important;
+        height: auto !important;
+        min-height: auto !important;
+        width: 100% !important;
+        overflow: visible !important;
+        position: static !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background-color: white !important;
+    }
+
+    /* 3. The POS Thermal Receipt Container */
+    #printable-receipt {
+        display: block !important;
+        visibility: visible !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important; /* Centers the receipt perfectly */
+        width: 350px !important; /* Standard POS printer width */
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 20px !important; 
+        font-family: 'Courier New', Courier, monospace; /* Typewriter feel */
+        color: black !important;
+        background: white !important;
+    }
+
+    /* 4. Text and Header Formatting */
+    .print-header { text-align: center !important; margin-bottom: 15px !important; }
+    .print-header h2 { margin: 0 0 5px 0 !important; font-size: 22px !important; font-weight: 900 !important; }
+    .print-header p { margin: 2px 0 !important; font-size: 14px !important; }
+    
+    #printable-receipt h3 { 
+        text-align: center !important; 
+        margin: 15px 0 !important; 
+        border-bottom: 1px dashed #000; 
+        border-top: 1px dashed #000; 
+        padding: 5px 0; 
+        font-size: 16px !important;
+        text-transform: uppercase;
+    }
+    
+    #printable-receipt p { margin: 4px 0 !important; font-size: 14px !important; }
+
+    /* 5. FORCE the table to stay side-by-side */
+    .print-items-table { 
+        display: table !important;
+        width: 100% !important; 
+        border-collapse: collapse !important; 
+        margin: 15px 0 !important; 
+    }
+    .print-items-table thead { display: table-header-group !important; }
+    .print-items-table tbody { display: table-row-group !important; }
+    .print-items-table tr { display: table-row !important; }
+    
+    .print-items-table th, .print-items-table td { 
+        display: table-cell !important;
+        padding: 6px 2px !important; 
+        border-bottom: 1px dashed #ccc !important;
+        font-size: 13px !important;
+        text-align: left !important;
+    }
+
+    /* Center QTY, Right-Align Price and Total */
+    .print-items-table th:nth-child(2), .print-items-table td:nth-child(2) { text-align: center !important; }
+    .print-items-table th:nth-child(3), .print-items-table td:nth-child(3),
+    .print-items-table th:nth-child(4), .print-items-table td:nth-child(4) { text-align: right !important; }
+
+    /* 6. Clean up the totals */
+    .print-totals { 
+        text-align: right !important; 
+        margin-top: 15px !important;
+    }
+    .print-totals p { margin: 4px 0 !important; font-size: 14px !important; }
+    .grand-total { 
+        font-size: 18px !important; 
+        font-weight: 900 !important; 
+        border-top: 2px dashed #000 !important; 
+        padding-top: 8px !important; 
+        margin-top: 8px !important;
+    }
+    
+    .print-footer { text-align: center !important; margin-top: 30px !important; font-style: italic !important; }
+}
