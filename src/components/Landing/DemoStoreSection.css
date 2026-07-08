@@ -1,0 +1,126 @@
+/* src/components/Landing/DemoStoreSection.css */
+.demo-store-section {
+  background-color: #f9fafb;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+.demo-store-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -50%;
+  width: 200%; height: 100%;
+  background-color: #ecb51c;
+  border-bottom-left-radius: 50%;
+  border-bottom-right-radius: 50%;
+  z-index: -1;
+  transform: translateY(-40%);
+}
+.demo-store-window {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+  border: 1px solid #e5e7eb;
+}
+.browser-header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+.browser-dots { display: flex; gap: 0.5rem; }
+.window-dot { width: 0.75rem; height: 0.75rem; border-radius: 50%; }
+.red { background-color: #ef4444; }
+.yellow { background-color: #f59e0b; }
+.green { background-color: #10b981; }
+.browser-url-bar {
+  flex-grow: 1;
+  background-color: #f3f4f6;
+  border-radius: 0.375rem;
+  margin: 0 2rem;
+  padding: 0.3rem 1rem;
+  text-align: center;
+  color: #4b5563;
+  font-size: 0.875rem;
+}
+.store-ui { display: flex; }
+.store-sidebar {
+  width: 250px;
+  padding: 1.5rem;
+  border-right: 1px solid #e5e7eb;
+}
+.demo-store-logo { width: 60px; height: 60px; border-radius: 0.75rem; margin-bottom: 0.5rem;}
+.store-brand h3 { font-size: 1.5rem; font-weight: 700; }
+.store-brand p { color: #6b7280; font-size: 0.875rem; }
+.demo-store-socials {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 1rem 0;
+}
+.demo-store-socials a { color: #9ca3af; transition: color 0.2s ease; }
+.demo-store-socials a:hover { color: #1f2937; }
+.demo-store-socials svg { width: 20px; height: 20px; }
+.store-main-content { flex-grow: 1; padding: 1.5rem; }
+.store-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.search-bar { display: flex; align-items: center; background-color: #f3f4f6; border-radius: 0.375rem; padding: 0.5rem; }
+.search-icon { width: 1.25rem; height: 1.25rem; color: #6b7280; margin-right: 0.5rem; }
+.search-bar input { background: none; border: none; outline: none; }
+.store-controls { display: flex; align-items: center; gap: 1.5rem; }
+.currency-selector { position: relative; }
+.currency-selector button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.currency-dropdown {
+  position: absolute;
+  top: 110%; right: 0;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+  border: 1px solid #e5e7eb;
+  list-style: none;
+  padding: 0.5rem 0;
+  margin: 0;
+  width: 120px;
+  z-index: 10;
+}
+.currency-dropdown li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+.currency-dropdown li:hover { background-color: #f3f4f6; }
+.cart-container { position: relative; }
+.cart-icon { width: 1.75rem; height: 1.75rem; }
+.cart-count {
+  position: absolute; top: -5px; right: -8px;
+  background-color: #ef4444; color: white;
+  border-radius: 50%; width: 20px; height: 20px;
+  font-size: 0.75rem; display: flex; justify-content: center; align-items: center;
+}
+.live-demo-products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
+.live-demo-product-card { background-color: #f9fafb; border-radius: 0.5rem; padding: 1rem; }
+.product-image-placeholder { height: 100px; background-color: #e5e7eb; border-radius: 0.25rem; margin-bottom: 0.75rem; }
+.product-title { font-weight: 600; font-size: 0.875rem; margin-bottom: 0.25rem; }
+.product-price { color: #1f2937; font-weight: 500; }
+
+@media (max-width: 767px) {
+  .demo-store-window { padding: 0 0.5rem; box-sizing: border-box; }
+  .store-ui { flex-direction: column; }
+  .store-sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e5e7eb; text-align: center; }
+  .store-top-bar { flex-wrap: wrap; gap: 1rem; }
+  .search-bar { flex-grow: 1; width: 100%; }
+  .live-demo-products-grid { grid-template-columns: 1fr 1fr; }
+}

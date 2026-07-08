@@ -1,0 +1,24 @@
+/* src/components/Landing/PricingSection.css */
+.pricing-section { background-color: #fff; }
+.pricing-grid { display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch; gap: 2rem; }
+.pricing-tier {
+  border: 2px solid #1f2937;
+  background-color: #fff; border-radius: 1rem;
+  padding: 2.5rem; width: 100%; max-width: 380px;
+  position: relative; display: flex; flex-direction: column; text-align: left;
+}
+.pricing-tier.featured { border: 2px solid #f59e0b; transform: scale(1.03); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+.popular-badge { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background-color: #f59e0b; color: #111827; padding: 0.25rem 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 700; }
+.pricing-tier h4 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+.pricing-tier .description { color: #6b7280; margin-bottom: 1.5rem; min-height: 40px; }
+.pricing-tier .price { font-size: 3.5rem; font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+.pricing-tier .price span { font-size: 1rem; font-weight: 500; color: #6b7280; }
+.pricing-tier ul { list-style: none; padding: 0; margin: 0 0 2.5rem 0; flex-grow: 1; }
+.pricing-tier ul li { display: flex; align-items: flex-start; margin-bottom: 1rem; color: #374151; }
+.check-icon { width: 1.25rem; height: 1.25rem; color: #10b981; margin-right: 0.75rem; flex-shrink: 0; margin-top: 3px; }
+
+@media (max-width: 767px) {
+  .pricing-grid { gap: 2.5rem; }
+  .pricing-tier { padding: 2rem 1.5rem; }
+  .pricing-tier .price { font-size: 2.75rem; }
+}

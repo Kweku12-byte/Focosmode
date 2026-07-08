@@ -1,0 +1,37 @@
+/* src/components/Landing/FeaturesSection.css */
+.how-it-works-section { background-color: #fff; }
+.steps-container { display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; position: relative; }
+.step-card { text-align: center; max-width: 300px; }
+.step-number {
+  width: 50px; height: 50px; border-radius: 50%;
+  background-color: #fef3c7; color: #f59e0b;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 1.5rem; font-weight: 700; margin: 0 auto 1.5rem;
+}
+.step-card h4 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+.step-card p { color: #4b5563; }
+.step-connector { display: none; }
+
+.dashboard-preview-section { background-color: #f9fafb; }
+.dashboard-image-placeholder {
+  height: 500px; background-color: #e5e7eb; border-radius: 0.75rem;
+  display: flex; justify-content: center; align-items: center;
+  color: #6b7280; font-size: 1.25rem; border: 2px dashed #d1d5db;
+}
+
+.payment-gateways-section { background-color: #fff; padding: 4rem 0; }
+.gateways-grid { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 3rem; max-width: 900px; margin: 0 auto; }
+.gateways-grid img { height: 40px; filter: grayscale(100%); opacity: 0.6; transition: all 0.3s ease; }
+.gateways-grid img:hover { filter: grayscale(0%); opacity: 1; }
+
+.integrations-section { background-color: #f9fafb; }
+.integrations-grid { display: flex; justify-content: center; align-items: center; gap: 3rem; flex-wrap: wrap; }
+.integration-card { background-color: #fff; border-radius: 0.75rem; padding: 1.5rem 2rem; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+.integration-card img { height: 40px; }
+
+@media (min-width: 768px) {
+  .step-connector { flex-grow: 1; height: 2px; background-color: #e5e7eb; margin-top: 25px; display: block; }
+}
+@media (max-width: 767px) {
+  .steps-container { flex-direction: column; align-items: center; gap: 3rem; }
+}

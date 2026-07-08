@@ -1,0 +1,88 @@
+/* src/components/Landing/Navbar.css */
+.header {
+  background-color: #fff;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: #111827;
+  text-decoration: none;
+}
+.logo img {
+  height: 40px;
+  width: auto;
+}
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.main-nav a {
+  font-weight: 600;
+  color: #4b5563;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.main-nav a:hover {
+  color: #f59e0b;
+}
+.main-nav .login-btn {
+  background: none;
+  border: none;
+  padding: 0 1rem 0 0;
+  margin: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  color: #4b5563;
+  border-right: 1px solid #d1d5db;
+  transition: color 0.2s;
+}
+.main-nav .login-btn:hover {
+  color: #f59e0b;
+}
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.menu-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+@media (max-width: 767px) {
+  .header { padding: 1rem; }
+  .mobile-menu-toggle { display: block; z-index: 101; }
+  .main-nav {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 80%;
+    height: 100vh;
+    background-color: white;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    transition: left 0.3s ease-in-out;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+  }
+  .main-nav.open { left: 0; }
+  .main-nav a { font-size: 1.5rem; }
+  .main-nav .login-btn { border: none; padding: 0; font-size: 1.5rem; }
+}
