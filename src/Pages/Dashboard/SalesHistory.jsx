@@ -4,12 +4,8 @@ import './SalesHistory.css';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../Services/firebase';
 import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
-
-// --- Components ---
 import ReceiptModal from './ReceiptModal';
 
-// --- Icon Components ---
-const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
 const SearchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>;
 
 const currencies = { 'GHS': '₵', 'NGN': '₦', 'USD': '$', 'GBP': '£', 'EUR': '€' };
@@ -24,8 +20,6 @@ const SalesHistory = () => {
 
     useEffect(() => {
         if (!currentUser) return;
-        
-        // Fetch Sales
         const salesCollectionRef = collection(db, 'businesses', currentUser.uid, 'sales');
         const q = query(salesCollectionRef, orderBy('createdAt', 'desc'));
 
@@ -39,7 +33,6 @@ const SalesHistory = () => {
             setLoading(false);
         });
 
-        // Fetch Business Data (needed for Receipt print)
         const unsubBusiness = onSnapshot(doc(db, 'businesses', currentUser.uid), (doc) => {
             if (doc.exists()) setBusinessData(doc.data());
         });
