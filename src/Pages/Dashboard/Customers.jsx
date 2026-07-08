@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+// src/Pages/Dashboard/Customers.jsx
+import React, { useState, useEffect } from 'react';
 import './Customers.css';
 // FIX: Corrected import paths to go up one directory
 import { useAuth } from '../../context/AuthContext';
@@ -172,10 +173,10 @@ const Customers = () => {
                                                <button onClick={() => setShowDeleteConfirm(null)}>No</button>
                                            </div>
                                        ) : (
-                                            <div className="action-buttons">
-                                                <button className="action-btn edit" onClick={() => openEditModal(customer)}><EditIcon/></button>
-                                                <button className="action-btn delete" onClick={() => setShowDeleteConfirm(customer.id)}><TrashIcon/></button>
-                                            </div>
+                                           <div className="action-buttons">
+                                               <button className="action-btn edit" onClick={() => openEditModal(customer)}><EditIcon/></button>
+                                               <button className="action-btn delete" onClick={() => setShowDeleteConfirm(customer.id)}><TrashIcon/></button>
+                                           </div>
                                        )}
                                     </td>
                                 </tr>
@@ -205,4 +206,3 @@ const Customers = () => {
 };
 
 export default Customers;
-
