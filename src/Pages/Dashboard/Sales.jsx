@@ -19,7 +19,8 @@ const ArrowLeftIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" 
 
 const currencies = { 'GHS': '₵', 'NGN': '₦', 'USD': '$', 'GBP': '£', 'EUR': '€' };
 
-const Sales = () => {
+// --- UPDATE: Accept activeCashier as a prop ---
+const Sales = ({ activeCashier }) => {
     const { currentUser } = useAuth();
     const [products, setProducts] = useState([]);
     const [customers, setCustomers] = useState([]);
@@ -136,6 +137,7 @@ const Sales = () => {
             changeDue,
             currency: cart[0]?.currency || 'GHS',
             paymentMethod,
+            cashierName: activeCashier?.name || 'Owner', // --- UPDATE: Attached cashier name here ---
             createdAt: new Date().toISOString(), // Best practice: store dates as ISO strings or Firestore Timestamps
             customer: selectedCustomer ? { id: selectedCustomer.id, name: selectedCustomer.name } : null,
         };

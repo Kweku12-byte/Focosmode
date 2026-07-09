@@ -4,16 +4,13 @@ import './SalesHistory.css';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../Services/firebase';
 import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
-
-// --- Components ---
 import ReceiptModal from './ReceiptModal';
 
-// --- Icon Components ---
 const SearchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>;
 
 const currencies = { 'GHS': '₵', 'NGN': '₦', 'USD': '$', 'GBP': '£', 'EUR': '€' };
 
-const SalesHistory = () => {
+const SalesHistory = ({ activeCashier }) => {
     const { currentUser } = useAuth();
     const [sales, setSales] = useState([]);
     const [businessData, setBusinessData] = useState(null);
@@ -24,7 +21,6 @@ const SalesHistory = () => {
     useEffect(() => {
         if (!currentUser) return;
         
-        // Fetch Sales
         const salesCollectionRef = collection(db, 'businesses', currentUser.uid, 'sales');
         const q = query(salesCollectionRef, orderBy('createdAt', 'desc'));
 
@@ -38,7 +34,6 @@ const SalesHistory = () => {
             setLoading(false);
         });
 
-        // Fetch Business Data (needed for Receipt print)
         const unsubBusiness = onSnapshot(doc(db, 'businesses', currentUser.uid), (docSnap) => {
             if (docSnap.exists()) setBusinessData(docSnap.data());
         });
@@ -48,7 +43,8 @@ const SalesHistory = () => {
 
     const filteredSales = sales.filter(sale => 
         (sale.items && sale.items.some(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))) ||
-        sale.id.toLowerCase().includes(searchTerm.toLowerCase())
+        sale.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (sale.cashierName && sale.cashierName.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     return (
@@ -60,7 +56,7 @@ const SalesHistory = () => {
                         <SearchIcon />
                         <input 
                             type="text" 
-                            placeholder="Search by product or Order ID..."
+                            placeholder="Search order ID, item, or cashier..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                         />
@@ -81,6 +77,7 @@ const SalesHistory = () => {
                                 <th>Items</th>
                                 <th>Total Amount</th>
                                 <th>Payment</th>
+                                <th>Cashier</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -90,6 +87,18 @@ const SalesHistory = () => {
                                     <td>{sale.items?.length || 0} item(s)</td>
                                     <td>{currencies[sale.currency] || '₵'}{(sale.totalAmount || 0).toFixed(2)}</td>
                                     <td>{sale.paymentMethod}</td>
+                                    <td>
+                                        <span style={{
+                                            background: sale.cashierName === 'Owner' ? '#fef3c7' : '#e0e7ff',
+                                            color: sale.cashierName === 'Owner' ? '#d97706' : '#1d4ed8',
+                                            padding: '4px 8px',
+                                            borderRadius: '12px',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 'bold'
+                                        }}>
+                                            {sale.cashierName || 'Owner'}
+                                        </span>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

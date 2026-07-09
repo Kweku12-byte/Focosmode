@@ -12,10 +12,10 @@ import Sales from './Sales';
 import Customers from './Customers';
 import SalesHistory from './SalesHistory';
 import MainDashboard from './MainDashboard';
-// --- NEW: Import Expenses Component ---
 import Expenses from './Expenses';
 import Settings from './Settings';
 import Staff from './Staff';
+import RegisterLock from './RegisterLock';
 
 // --- Icon Components (for the sidebar) ---
 const DashboardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
@@ -27,6 +27,7 @@ const LogoutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" vie
 const MenuIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg>;
 const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>;
 const SettingsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
+const LockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>;
 
 const FocosmodeDashboard = () => {
     const { currentUser } = useAuth();
@@ -37,29 +38,28 @@ const FocosmodeDashboard = () => {
     const [activeView, setActiveView] = useState('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [openMenus, setOpenMenus] = useState({});
+    
+    const [activeCashier, setActiveCashier] = useState(() => {
+        const saved = localStorage.getItem('activeCashier');
+        return saved ? JSON.parse(saved) : null;
+    });
+    
+    const [isLocked, setIsLocked] = useState(() => {
+        return localStorage.getItem('activeCashier') ? false : true;
+    });
 
     const toggleMenu = (menuKey) => {
-        setOpenMenus(prevMenus => ({
-            ...prevMenus,
-            [menuKey]: !prevMenus[menuKey]
-        }));
+        setOpenMenus(prevMenus => ({ ...prevMenus, [menuKey]: !prevMenus[menuKey] }));
     };
 
     useEffect(() => {
-        if (!currentUser) {
-            setLoading(false);
-            return;
-        }
+        if (!currentUser) return setLoading(false);
         const docRef = doc(db, 'businesses', currentUser.uid);
         const unsubscribe = onSnapshot(docRef, (docSnap) => {
-            if (docSnap.exists()) {
-                setBusinessData(docSnap.data());
-            } else {
-                setError("Could not find your business profile.");
-            }
+            if (docSnap.exists()) setBusinessData(docSnap.data());
+            else setError("Could not find your business profile.");
             setLoading(false);
         }, (err) => {
-            console.error("Firestore snapshot error:", err);
             setError("Failed to load business data.");
             setLoading(false);
         });
@@ -69,116 +69,151 @@ const FocosmodeDashboard = () => {
     const handleLogout = async () => {
         try {
             await signOut(auth);
+            // Clear memory on full logout
+            localStorage.removeItem('activeCashier');
             navigate('/');
         } catch (error) {
             console.error("Failed to log out", error);
         }
     };
 
+    const isOwner = activeCashier?.role === 'owner';
+
     const renderActiveView = () => {
         switch (activeView) {
-            case 'dashboard': return <MainDashboard />;
+            case 'dashboard': return isOwner ? <MainDashboard /> : <Sales activeCashier={activeCashier} />;
             case 'inventory-all': return <Inventory />;
-            case 'sales-pos': return <Sales />;
+            case 'sales-pos': return <Sales activeCashier={activeCashier} />;
             case 'customers-all': return <Customers />;
-            case 'sales-history': return <SalesHistory />;
-            case 'expenses': return <Expenses />; // --- NEW: Added Expenses route ---
-            case 'settings': return <Settings />;
-            case 'staff': return <Staff />; // Added
+            case 'sales-history': return <SalesHistory activeCashier={activeCashier} />;
+            case 'expenses': return isOwner ? <Expenses /> : <Sales activeCashier={activeCashier} />;
+            case 'settings': return isOwner ? <Settings /> : <Sales activeCashier={activeCashier} />;
+            case 'staff': return isOwner ? <Staff /> : <Sales activeCashier={activeCashier} />;
             default: return <div><h1>Welcome!</h1></div>;
         }
     };
 
-    if (loading) { return <div className="dashboard-loader">Loading Your Dashboard...</div>; }
-    if (error) { return <div className="dashboard-error">Error: {error}</div>; }
+    if (loading) return <div className="dashboard-loader">Loading Your Dashboard...</div>;
+    if (error) return <div className="dashboard-error">Error: {error}</div>;
     
     const NavItem = ({ view, label, icon: Icon }) => (
         <button className={`nav-button ${activeView === view ? 'active' : ''}`} onClick={() => { setActiveView(view); setIsSidebarOpen(false); }}>
-            {Icon && <Icon />}
-            <span>{label}</span>
+            {Icon && <Icon />} <span>{label}</span>
         </button>
     );
 
     const AccordionItem = ({ title, menuKey, icon: Icon, children }) => (
         <div className="accordion-item">
             <button className={`accordion-header ${openMenus[menuKey] ? 'open' : ''}`} onClick={() => toggleMenu(menuKey)}>
-                <div className="accordion-title">
-                    <Icon /><span>{title}</span>
-                </div>
+                <div className="accordion-title"><Icon /><span>{title}</span></div>
                 <ChevronDownIcon />
             </button>
-            <div className={`accordion-content ${openMenus[menuKey] ? 'open' : ''}`}>
-                {children}
-            </div>
+            <div className={`accordion-content ${openMenus[menuKey] ? 'open' : ''}`}>{children}</div>
         </div>
     );
 
     return (
-        <div className="dashboard-layout">
-            <div className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)}></div>
-            
-            <div className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
-                <div className="sidebar-header">
-                    <button className="sidebar-logo" onClick={() => { setActiveView('dashboard'); setIsSidebarOpen(false); }}>
-                        <img src="/logo192.png" alt="Focosmode Logo"/>
-                        <span>Focosmode</span>
-                    </button>
-                </div>
+        <>
+            {isLocked && (
+                <RegisterLock 
+                    businessData={businessData} 
+                    onUnlock={(user) => {
+                        setActiveCashier(user);
+                        setIsLocked(false);
+                        localStorage.setItem('activeCashier', JSON.stringify(user));
+                        if (user.role !== 'owner') setActiveView('sales-pos');
+                    }} 
+                />
+            )}
+
+            <div className="dashboard-layout">
+                <div className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)}></div>
                 
-                <nav className="sidebar-nav-scrollable">
-                    <NavItem view="dashboard" label="Dashboard" icon={DashboardIcon} />
-                    
-                    <AccordionItem title="Sales" menuKey="sales" icon={SalesIcon}>
-                        <NavItem view="sales-pos" label="New Sale (POS)" />
-                        <NavItem view="sales-history" label="Sales History" />
-                    </AccordionItem>
-
-                    <AccordionItem title="Inventory" menuKey="inventory" icon={InventoryIcon}>
-                        <NavItem view="inventory-all" label="All Products" />
-                    </AccordionItem>
-
-                    <AccordionItem title="Customers" menuKey="customers" icon={CustomersIcon}>
-                        <NavItem view="customers-all" label="All Customers" />
-                    </AccordionItem>
-
-                    {/* --- NEW: Expense Tracker Menu Item --- */}
-                    <AccordionItem title="Expenses" menuKey="expenses" icon={ExpenseIcon}>
-                        <NavItem view="expenses" label="Track Expenses" />
-                    </AccordionItem>
-                    <AccordionItem title="Business" menuKey="business" icon={SettingsIcon}>
-                        <NavItem view="staff" label="Staff" />
-                        <NavItem view="expenses" label="Expenses" />
-                        <NavItem view="settings" label="Settings" />
-                    </AccordionItem>
-                </nav>
-                
-                <div className="sidebar-footer">
-                    <div className="user-profile">
-                         <div className="user-avatar">{businessData?.ownerName?.charAt(0)}</div>
-                         <div className="user-info">
-                            <span className="user-name">{businessData?.ownerName || '...'}</span>
-                            <span className="user-email">{currentUser?.email}</span>
-                         </div>
+                <div className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+                    <div className="sidebar-header">
+                        <button className="sidebar-logo" onClick={() => { setActiveView(isOwner ? 'dashboard' : 'sales-pos'); setIsSidebarOpen(false); }}>
+                            <img src="/logo192.png" alt="Focosmode Logo"/>
+                            <span>Focosmode</span>
+                        </button>
                     </div>
-                    <button className="nav-button logout" onClick={handleLogout}>
-                        <LogoutIcon />
-                    </button>
-                </div>
-            </div>
+                    
+                    <nav className="sidebar-nav-scrollable">
+                        {isOwner && <NavItem view="dashboard" label="Dashboard" icon={DashboardIcon} />}
+                        
+                        <AccordionItem title="Sales" menuKey="sales" icon={SalesIcon}>
+                            <NavItem view="sales-pos" label="New Sale (POS)" />
+                            <NavItem view="sales-history" label="Sales History" />
+                        </AccordionItem>
 
-            <main className="dashboard-main-content">
-                 <header className="dashboard-header">
-                    <button className="mobile-sidebar-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                        <MenuIcon />
-                    </button>
-                    <h3>Hello, {businessData?.ownerName || 'Owner'}!</h3>
-                </header>
-                <div className="dashboard-view-container">
-                    {renderActiveView()}
+                        <AccordionItem title="Inventory" menuKey="inventory" icon={InventoryIcon}>
+                            <NavItem view="inventory-all" label="All Products" />
+                        </AccordionItem>
+
+                        <AccordionItem title="Customers" menuKey="customers" icon={CustomersIcon}>
+                            <NavItem view="customers-all" label="All Customers" />
+                        </AccordionItem>
+
+                        {isOwner && (
+                            <>
+                                <AccordionItem title="Expenses" menuKey="expenses" icon={ExpenseIcon}>
+                                    <NavItem view="expenses" label="Track Expenses" />
+                                </AccordionItem>
+
+                                <AccordionItem title="Business" menuKey="business" icon={SettingsIcon}>
+                                    <NavItem view="staff" label="Staff" />
+                                    <NavItem view="settings" label="Settings" />
+                                </AccordionItem>
+                            </>
+                        )}
+                    </nav>
+                    
+                    <div className="sidebar-footer">
+                        <div className="user-profile">
+                            <div className="user-avatar">{activeCashier?.name?.charAt(0) || businessData?.ownerName?.charAt(0) || 'U'}</div>
+                            <div className="user-info">
+                                <span className="user-name">{activeCashier?.name || businessData?.ownerName || '...'}</span>
+                                <span className="user-email">{activeCashier?.role === 'owner' ? 'Owner' : 'Cashier Mode'}</span>
+                            </div>
+                        </div>
+                        
+                        {/* MAIN FIREBASE LOGOUT RESTORED */}
+                        <button className="nav-button logout" onClick={handleLogout} title="Sign Out of Focosmode">
+                            <LogoutIcon />
+                        </button>
+                    </div>
                 </div>
-            </main>
-        </div>
+
+                <main className="dashboard-main-content">
+                    <header className="dashboard-header" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+                            <button className="mobile-sidebar-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+                                <MenuIcon />
+                            </button>
+                            <h3 style={{margin: 0}}>Hello, {activeCashier?.name || businessData?.ownerName || 'User'}!</h3>
+                        </div>
+                        
+                        {/* --- NEW: Lock / Switch User Button in the Header --- */}
+                        <button 
+                            className="header-lock-btn"
+                            onClick={() => {
+                                setIsLocked(true);
+                                setActiveCashier(null);
+                                localStorage.removeItem('activeCashier');
+                            }}
+                            title="Lock Register or Switch User"
+                        >
+                            <LockIcon style={{width: '20px', height: '20px'}} />
+                            <span className="screen-only">Lock POS</span>
+                        </button>
+                    </header>
+                    <div className="dashboard-view-container">
+                        {renderActiveView()}
+                    </div>
+                </main>
+            </div>
+        </>
     );
 };
 
 export default FocosmodeDashboard;
+

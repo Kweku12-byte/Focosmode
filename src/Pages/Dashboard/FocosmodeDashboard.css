@@ -183,3 +183,37 @@
     .mobile-sidebar-toggle svg { width: 24px; height: 24px; stroke-width: 2.5; }
 }
 
+/* Add to FocosmodeDashboard.css */
+
+.header-lock-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.header-lock-btn:hover {
+    background-color: #fecaca;
+}
+
+@media print {
+    .header-lock-btn {
+        display: none !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .header-lock-btn span {
+        display: none;
+    }
+    .header-lock-btn {
+        padding: 0.5rem;
+    }
+}
