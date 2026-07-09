@@ -1,0 +1,6 @@
+/* src/Pages/Dashboard/Staff.css */
+.staff-container { padding: 2rem; }
+.staff-header { display: flex; justify-content: space-between; margin-bottom: 2rem; }
+.add-staff-btn { background: #1f2937; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; display: flex; align-items: center; gap: 0.5rem; border: none; cursor: pointer; }
+.staff-table { width: 100%; border-collapse: collapse; }
+.staff-table th, .staff-table td { padding: 1rem; border-bottom: 1px solid #ddd; text-align: left; }

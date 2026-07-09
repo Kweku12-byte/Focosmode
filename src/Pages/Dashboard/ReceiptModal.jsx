@@ -42,6 +42,9 @@ const ReceiptModal = ({ sale, business, onClose, currencies }) => {
              receiptText += `Tendered: ${currencySymbol}${(sale.tenderedAmount || 0).toFixed(2)}\n`;
              receiptText += `Change:   ${currencySymbol}${(sale.changeDue || 0).toFixed(2)}\n`;
         }
+        
+        // NEW: Dynamic Receipt Message added to view mode
+        receiptText += `\n${business?.receiptMessage || 'Thank you for your business!'}\n`;
 
         return (
             <div className="receipt-modal-overlay">
@@ -126,10 +129,12 @@ const ReceiptModal = ({ sale, business, onClose, currencies }) => {
                     <p><strong>Discount:</strong> -{currencySymbol}{(sale.discountAmount || 0).toFixed(2)}</p>
                     <p className="grand-total"><strong>Total:</strong> {currencySymbol}{(sale.totalAmount || 0).toFixed(2)}</p>
                 </div>
-                <p className="print-footer">Thank you for your business!</p>
+                {/* NEW: Dynamic Receipt Message on the printed paper */}
+                <p className="print-footer">{business?.receiptMessage || 'Thank you for your business!'}</p>
             </div>
         </>
     );
 };
 
 export default ReceiptModal;
+
