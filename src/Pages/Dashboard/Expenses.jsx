@@ -5,6 +5,9 @@ import { useAuth } from '../../context/AuthContext';
 import { db } from '../../Services/firebase';
 import { collection, onSnapshot, addDoc, doc, deleteDoc, query, orderBy } from 'firebase/firestore';
 
+// --- NEW: Import the Security Modal ---
+import DeleteAuthModal from './DeleteAuthModal';
+
 // --- Icon Components ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>;
 const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
@@ -15,7 +18,7 @@ const ReceiptIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" vi
 const EXPENSE_CATEGORIES = ['Restock / Inventory', 'Utilities & Bills', 'Rent', 'Marketing', 'Salaries', 'Transport', 'Other'];
 const currencies = { 'GHS': '₵', 'NGN': '₦', 'USD': '$', 'GBP': '£', 'EUR': '€' };
 
-const Expenses = () => {
+const Expenses = ({ activeCashier }) => {
     const { currentUser } = useAuth();
     const [expenses, setExpenses] = useState([]);
     const [businessData, setBusinessData] = useState(null);
@@ -24,19 +27,17 @@ const Expenses = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [error, setError] = useState('');
 
-    // --- Form State ---
     const [amount, setAmount] = useState('');
     const [category, setCategory] = useState(EXPENSE_CATEGORIES[0]);
     const [description, setDescription] = useState('');
-    const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split('T')[0]); // Default to today
+    const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split('T')[0]);
     
-    // --- Delete State ---
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+    // --- NEW: State for secure deletion ---
+    const [itemToDelete, setItemToDelete] = useState(null);
 
     useEffect(() => {
         if (!currentUser) return;
         
-        // Fetch Expenses
         const expensesRef = collection(db, 'businesses', currentUser.uid, 'expenses');
         const q = query(expensesRef, orderBy('date', 'desc'));
 
@@ -46,7 +47,6 @@ const Expenses = () => {
             setLoading(false);
         });
 
-        // Fetch Business Data (for currency symbol)
         const unsubBusiness = onSnapshot(doc(db, 'businesses', currentUser.uid), (doc) => {
             if (doc.exists()) setBusinessData(doc.data());
         });
@@ -57,9 +57,7 @@ const Expenses = () => {
     const handleAddExpense = async (e) => {
         e.preventDefault();
         setError('');
-        if (!amount || isNaN(amount) || amount <= 0) {
-            return setError("Please enter a valid amount.");
-        }
+        if (!amount || isNaN(amount) || amount <= 0) return setError("Please enter a valid amount.");
 
         try {
             const expensesRef = collection(db, 'businesses', currentUser.uid, 'expenses');
@@ -67,7 +65,8 @@ const Expenses = () => {
                 amount: parseFloat(amount),
                 category,
                 description,
-                date: expenseDate, // YYYY-MM-DD string
+                date: expenseDate,
+                cashierName: activeCashier?.name || 'Owner', 
                 createdAt: new Date().toISOString()
             });
             closeModal();
@@ -77,13 +76,15 @@ const Expenses = () => {
         }
     };
 
-    const handleDeleteExpense = async (expenseId) => {
+    // --- NEW: Actual delete execution after PIN verification ---
+    const executeDelete = async () => {
+        if (!itemToDelete) return;
         try {
-            await deleteDoc(doc(db, 'businesses', currentUser.uid, 'expenses', expenseId));
+            await deleteDoc(doc(db, 'businesses', currentUser.uid, 'expenses', itemToDelete.id));
         } catch (err) {
             console.error("Delete error:", err);
         } finally {
-            setShowDeleteConfirm(null);
+            setItemToDelete(null);
         }
     };
 
@@ -99,7 +100,8 @@ const Expenses = () => {
 
     const filteredExpenses = expenses.filter(exp => 
         exp.description.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        exp.category.toLowerCase().includes(searchTerm.toLowerCase())
+        exp.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (exp.cashierName && exp.cashierName.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
     const totalExpenses = useMemo(() => {
@@ -132,7 +134,7 @@ const Expenses = () => {
                         <SearchIcon />
                         <input 
                             type="text" 
-                            placeholder="Search description or category..."
+                            placeholder="Search descriptions, category, or staff..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                         />
@@ -141,7 +143,7 @@ const Expenses = () => {
 
                 {loading ? <p className="loading-text">Loading expenses...</p> : filteredExpenses.length === 0 ? (
                     <div className="no-expenses-view">
-                        <p>No expenses found. Track your costs to calculate net profit!</p>
+                        <p>No expenses found.</p>
                     </div>
                 ) : (
                     <div className="expenses-table-container">
@@ -151,6 +153,7 @@ const Expenses = () => {
                                     <th>Date</th>
                                     <th>Category</th>
                                     <th>Description</th>
+                                    <th>Logged By</th>
                                     <th className="align-right">Amount</th>
                                     <th className="align-center">Actions</th>
                                 </tr>
@@ -161,19 +164,17 @@ const Expenses = () => {
                                         <td>{new Date(exp.date).toLocaleDateString()}</td>
                                         <td><span className="category-badge">{exp.category}</span></td>
                                         <td className="description-cell">{exp.description || '-'}</td>
+                                        <td>
+                                            <span style={{ fontSize: '0.85rem', fontWeight: '600', color: exp.cashierName === 'Owner' ? '#d97706' : '#1d4ed8' }}>
+                                                {exp.cashierName || 'Owner'}
+                                            </span>
+                                        </td>
                                         <td className="amount-cell align-right">{currencySymbol}{exp.amount.toFixed(2)}</td>
                                         <td className="align-center">
-                                            {showDeleteConfirm === exp.id ? (
-                                                <div className="delete-confirm">
-                                                    <span>Delete?</span>
-                                                    <button className="confirm-yes" onClick={() => handleDeleteExpense(exp.id)}>Yes</button>
-                                                    <button className="confirm-no" onClick={() => setShowDeleteConfirm(null)}>No</button>
-                                                </div>
-                                            ) : (
-                                                <button className="action-btn delete" onClick={() => setShowDeleteConfirm(exp.id)} title="Delete Expense">
-                                                    <TrashIcon/>
-                                                </button>
-                                            )}
+                                            {/* --- NEW: Trigger Modal instead of inline confirm --- */}
+                                            <button className="action-btn delete" onClick={() => setItemToDelete(exp)} title="Delete Expense">
+                                                <TrashIcon/>
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -182,6 +183,14 @@ const Expenses = () => {
                     </div>
                 )}
             </div>
+
+            {/* --- NEW: Standalone Security Modal --- */}
+            <DeleteAuthModal 
+                isOpen={itemToDelete !== null}
+                onClose={() => setItemToDelete(null)}
+                itemName={itemToDelete?.description || itemToDelete?.category || 'Expense'}
+                onSuccess={executeDelete}
+            />
 
             {isModalOpen && (
                 <div className="modal-overlay">

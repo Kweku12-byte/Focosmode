@@ -28,6 +28,7 @@ const MenuIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewB
 const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>;
 const SettingsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 const LockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>;
+const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
 
 const FocosmodeDashboard = () => {
     const { currentUser } = useAuth();
@@ -47,6 +48,13 @@ const FocosmodeDashboard = () => {
     const [isLocked, setIsLocked] = useState(() => {
         return localStorage.getItem('activeCashier') ? false : true;
     });
+
+    // --- NEW: Deep Security States for Business Tabs ---
+    const [isBackendUnlocked, setIsBackendUnlocked] = useState(false);
+    const [showBackendPinModal, setShowBackendPinModal] = useState(false);
+    const [pendingBackendView, setPendingBackendView] = useState(null);
+    const [backendPinEntry, setBackendPinEntry] = useState('');
+    const [backendPinError, setBackendPinError] = useState('');
 
     const toggleMenu = (menuKey) => {
         setOpenMenus(prevMenus => ({ ...prevMenus, [menuKey]: !prevMenus[menuKey] }));
@@ -69,8 +77,8 @@ const FocosmodeDashboard = () => {
     const handleLogout = async () => {
         try {
             await signOut(auth);
-            // Clear memory on full logout
             localStorage.removeItem('activeCashier');
+            setIsBackendUnlocked(false); // Reset security on logout
             navigate('/');
         } catch (error) {
             console.error("Failed to log out", error);
@@ -79,6 +87,37 @@ const FocosmodeDashboard = () => {
 
     const isOwner = activeCashier?.role === 'owner';
 
+    // --- NEW: Nav Interceptor logic ---
+    const handleNavClick = (view) => {
+        // If clicking Staff or Settings, and it hasn't been unlocked this session
+        if ((view === 'staff' || view === 'settings') && isOwner) {
+            if (!isBackendUnlocked) {
+                setPendingBackendView(view);
+                setShowBackendPinModal(true);
+                return; // Stop them from navigating
+            }
+        }
+        // Otherwise proceed normally
+        setActiveView(view);
+        setIsSidebarOpen(false);
+    };
+
+    const handleBackendPinSubmit = (e) => {
+        e.preventDefault();
+        const correctPin = businessData?.ownerPin || '0000';
+        if (backendPinEntry === correctPin) {
+            setIsBackendUnlocked(true);
+            setActiveView(pendingBackendView);
+            setShowBackendPinModal(false);
+            setBackendPinEntry('');
+            setBackendPinError('');
+            setIsSidebarOpen(false);
+        } else {
+            setBackendPinError('Incorrect Owner PIN');
+            setBackendPinEntry('');
+        }
+    };
+
     const renderActiveView = () => {
         switch (activeView) {
             case 'dashboard': return isOwner ? <MainDashboard /> : <Sales activeCashier={activeCashier} />;
@@ -86,7 +125,7 @@ const FocosmodeDashboard = () => {
             case 'sales-pos': return <Sales activeCashier={activeCashier} />;
             case 'customers-all': return <Customers />;
             case 'sales-history': return <SalesHistory activeCashier={activeCashier} />;
-            case 'expenses': return isOwner ? <Expenses /> : <Sales activeCashier={activeCashier} />;
+            case 'expenses': return <Expenses activeCashier={activeCashier} />;
             case 'settings': return isOwner ? <Settings /> : <Sales activeCashier={activeCashier} />;
             case 'staff': return isOwner ? <Staff /> : <Sales activeCashier={activeCashier} />;
             default: return <div><h1>Welcome!</h1></div>;
@@ -96,8 +135,9 @@ const FocosmodeDashboard = () => {
     if (loading) return <div className="dashboard-loader">Loading Your Dashboard...</div>;
     if (error) return <div className="dashboard-error">Error: {error}</div>;
     
+    // Updated NavItem to use the interceptor
     const NavItem = ({ view, label, icon: Icon }) => (
-        <button className={`nav-button ${activeView === view ? 'active' : ''}`} onClick={() => { setActiveView(view); setIsSidebarOpen(false); }}>
+        <button className={`nav-button ${activeView === view ? 'active' : ''}`} onClick={() => handleNavClick(view)}>
             {Icon && <Icon />} <span>{label}</span>
         </button>
     );
@@ -126,12 +166,38 @@ const FocosmodeDashboard = () => {
                 />
             )}
 
+            {/* --- NEW: Security Gateway Modal --- */}
+            {showBackendPinModal && (
+                <div className="modal-overlay" style={{zIndex: 9999}}>
+                    <div className="modal-content" style={{width: '350px', textAlign: 'center'}}>
+                        <button className="close-modal-btn" onClick={() => {setShowBackendPinModal(false); setBackendPinEntry(''); setBackendPinError('');}}><XIcon /></button>
+                        <div style={{color: '#f59e0b', marginBottom: '1rem'}}><LockIcon style={{width: '48px', height: '48px'}}/></div>
+                        <h3 style={{marginTop: 0}}>Security Check</h3>
+                        <p style={{fontSize: '0.9rem', color: '#6b7280', marginBottom: '1.5rem'}}>Enter the Owner POS PIN to access Business Settings.</p>
+                        <form onSubmit={handleBackendPinSubmit}>
+                            <input 
+                                type="password" maxLength="4" 
+                                placeholder="PIN" 
+                                value={backendPinEntry} 
+                                onChange={e => setBackendPinEntry(e.target.value.replace(/\D/g, ''))} 
+                                required autoFocus
+                                style={{width: '100%', padding: '1rem', textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.5rem', marginBottom: '1rem', border: '1px solid #d1d5db', borderRadius: '0.5rem'}}
+                            />
+                            {backendPinError && <p style={{color: '#ef4444', fontSize: '0.85rem', margin: '-0.5rem 0 1rem 0'}}>{backendPinError}</p>}
+                            <button type="submit" style={{width: '100%', padding: '0.875rem', background: '#1f2937', color: 'white', border: 'none', borderRadius: '0.5rem', fontWeight: 'bold', cursor: 'pointer'}}>
+                                Verify & Proceed
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             <div className="dashboard-layout">
                 <div className={`sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} onClick={() => setIsSidebarOpen(false)}></div>
                 
                 <div className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
                     <div className="sidebar-header">
-                        <button className="sidebar-logo" onClick={() => { setActiveView(isOwner ? 'dashboard' : 'sales-pos'); setIsSidebarOpen(false); }}>
+                        <button className="sidebar-logo" onClick={() => { handleNavClick(isOwner ? 'dashboard' : 'sales-pos'); }}>
                             <img src="/logo192.png" alt="Focosmode Logo"/>
                             <span>Focosmode</span>
                         </button>
@@ -153,17 +219,15 @@ const FocosmodeDashboard = () => {
                             <NavItem view="customers-all" label="All Customers" />
                         </AccordionItem>
 
-                        {isOwner && (
-                            <>
-                                <AccordionItem title="Expenses" menuKey="expenses" icon={ExpenseIcon}>
-                                    <NavItem view="expenses" label="Track Expenses" />
-                                </AccordionItem>
+                        <AccordionItem title="Expenses" menuKey="expenses" icon={ExpenseIcon}>
+                            <NavItem view="expenses" label="Track Expenses" />
+                        </AccordionItem>
 
-                                <AccordionItem title="Business" menuKey="business" icon={SettingsIcon}>
-                                    <NavItem view="staff" label="Staff" />
-                                    <NavItem view="settings" label="Settings" />
-                                </AccordionItem>
-                            </>
+                        {isOwner && (
+                            <AccordionItem title="Business" menuKey="business" icon={SettingsIcon}>
+                                <NavItem view="staff" label="Staff" />
+                                <NavItem view="settings" label="Settings" />
+                            </AccordionItem>
                         )}
                     </nav>
                     
@@ -175,8 +239,6 @@ const FocosmodeDashboard = () => {
                                 <span className="user-email">{activeCashier?.role === 'owner' ? 'Owner' : 'Cashier Mode'}</span>
                             </div>
                         </div>
-                        
-                        {/* MAIN FIREBASE LOGOUT RESTORED */}
                         <button className="nav-button logout" onClick={handleLogout} title="Sign Out of Focosmode">
                             <LogoutIcon />
                         </button>
@@ -192,12 +254,12 @@ const FocosmodeDashboard = () => {
                             <h3 style={{margin: 0}}>Hello, {activeCashier?.name || businessData?.ownerName || 'User'}!</h3>
                         </div>
                         
-                        {/* --- NEW: Lock / Switch User Button in the Header --- */}
                         <button 
                             className="header-lock-btn"
                             onClick={() => {
                                 setIsLocked(true);
                                 setActiveCashier(null);
+                                setIsBackendUnlocked(false); // --- RELOCK BACKEND ---
                                 localStorage.removeItem('activeCashier');
                             }}
                             title="Lock Register or Switch User"

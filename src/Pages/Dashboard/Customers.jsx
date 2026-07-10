@@ -6,6 +6,9 @@ import { useAuth } from '../../context/AuthContext';
 import { db } from '../../Services/firebase';
 import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
+// --- NEW: Import the Security Modal ---
+import DeleteAuthModal from './DeleteAuthModal';
+
 // --- Icon Components ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>;
 const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
@@ -29,8 +32,8 @@ const Customers = () => {
     const [customerEmail, setCustomerEmail] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
     
-    // --- State for Delete Confirmation ---
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(null); 
+    // --- NEW: State for secure deletion ---
+    const [itemToDelete, setItemToDelete] = useState(null); 
 
 
     // --- Fetch Customers in Real-time ---
@@ -77,15 +80,15 @@ const Customers = () => {
         }
     };
     
-    // --- Handle Delete Customer ---
-    const handleDeleteCustomer = async (customerId) => {
-        if (!currentUser) return;
+    // --- NEW: Actual delete execution after PIN verification ---
+    const executeDelete = async () => {
+        if (!currentUser || !itemToDelete) return;
         try {
-            await deleteDoc(doc(db, 'businesses', currentUser.uid, 'customers', customerId));
+            await deleteDoc(doc(db, 'businesses', currentUser.uid, 'customers', itemToDelete.id));
         } catch (err) {
             console.error("Delete error:", err);
         } finally {
-            setShowDeleteConfirm(null); 
+            setItemToDelete(null); 
         }
     };
 
@@ -166,18 +169,11 @@ const Customers = () => {
                                     <td>{customer.email || 'N/A'}</td>
                                     <td>{customer.phone || 'N/A'}</td>
                                     <td>
-                                       {showDeleteConfirm === customer.id ? (
-                                           <div className="delete-confirm">
-                                               <span>Sure?</span>
-                                               <button onClick={() => handleDeleteCustomer(customer.id)}>Yes</button>
-                                               <button onClick={() => setShowDeleteConfirm(null)}>No</button>
-                                           </div>
-                                       ) : (
-                                           <div className="action-buttons">
-                                               <button className="action-btn edit" onClick={() => openEditModal(customer)}><EditIcon/></button>
-                                               <button className="action-btn delete" onClick={() => setShowDeleteConfirm(customer.id)}><TrashIcon/></button>
-                                           </div>
-                                       )}
+                                        <div className="action-buttons">
+                                            <button className="action-btn edit" onClick={() => openEditModal(customer)}><EditIcon/></button>
+                                            {/* --- NEW: Trigger Modal instead of inline confirm --- */}
+                                            <button className="action-btn delete" onClick={() => setItemToDelete(customer)}><TrashIcon/></button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -185,6 +181,14 @@ const Customers = () => {
                     </table>
                 </div>
             )}
+
+            {/* --- NEW: Standalone Security Modal --- */}
+            <DeleteAuthModal 
+                isOpen={itemToDelete !== null}
+                onClose={() => setItemToDelete(null)}
+                itemName={itemToDelete?.name || 'Customer'}
+                onSuccess={executeDelete}
+            />
 
             {isModalOpen && (
                 <div className="modal-overlay">

@@ -1,3 +1,4 @@
+// src/Pages/Dashboard/Inventory.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import './Inventory.css';
 // FIX: Corrected import paths to go up two directories
@@ -5,6 +6,9 @@ import { useAuth } from '../../context/AuthContext';
 import { db, storage } from '../../Services/firebase';
 import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+
+// --- NEW: Import the Security Modal ---
+import DeleteAuthModal from './DeleteAuthModal';
 
 // --- Icon Components ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>;
@@ -44,7 +48,8 @@ const Inventory = () => {
     const [existingImageUrl, setExistingImageUrl] = useState('');
     const fileInputRef = useRef(null);
     
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+    // --- NEW: State for secure deletion ---
+    const [itemToDelete, setItemToDelete] = useState(null);
 
     useEffect(() => {
         if (!currentUser) return;
@@ -66,8 +71,7 @@ const Inventory = () => {
         setError('');
         if (!currentUser) return setError("You are not logged in.");
 
-        // NEW: Check image file size before doing anything else
-        if (imageFile && imageFile.size > 5 * 1024 * 1024) { // 5MB limit
+        if (imageFile && imageFile.size > 5 * 1024 * 1024) { 
             return setError("Image file is too large. Please upload an image under 5MB.");
         }
         
@@ -91,7 +95,7 @@ const Inventory = () => {
             name: productName,
             type: productType,
             price: Number(price),
-            currency: currency, // NEW: save currency
+            currency: currency, 
             description: description,
             imageUrl: imageUrl || '',
         };
@@ -117,18 +121,19 @@ const Inventory = () => {
         }
     };
     
-    const handleDeleteProduct = async (productId, imageUrl) => {
-        if (!currentUser) return;
+    // --- NEW: Actual delete execution after PIN verification ---
+    const executeDelete = async () => {
+        if (!currentUser || !itemToDelete) return;
         try {
-            await deleteDoc(doc(db, 'businesses', currentUser.uid, 'products', productId));
-            if (imageUrl) {
-                const imageRef = ref(storage, imageUrl);
+            await deleteDoc(doc(db, 'businesses', currentUser.uid, 'products', itemToDelete.id));
+            if (itemToDelete.imageUrl) {
+                const imageRef = ref(storage, itemToDelete.imageUrl);
                 await deleteObject(imageRef);
             }
         } catch (err) {
             console.error("Delete error:", err);
         } finally {
-            setShowDeleteConfirm(null);
+            setItemToDelete(null);
         }
     };
 
@@ -144,7 +149,7 @@ const Inventory = () => {
         setProductName(product.name);
         setProductType(product.type);
         setPrice(product.price);
-        setCurrency(product.currency || 'GHS'); // NEW: set currency on edit
+        setCurrency(product.currency || 'GHS'); 
         setQuantity(product.quantity || '');
         setDescription(product.description || '');
         setExistingImageUrl(product.imageUrl || '');
@@ -155,7 +160,7 @@ const Inventory = () => {
         setProductName('');
         setProductType('Physical');
         setPrice('');
-        setCurrency('GHS'); // NEW: reset currency
+        setCurrency('GHS'); 
         setQuantity('');
         setDescription('');
         setExistingImageUrl('');
@@ -220,22 +225,14 @@ const Inventory = () => {
                                     </td>
                                     <td>{product.name}</td>
                                     <td><span className={`product-type-badge ${product.type.toLowerCase()}`}>{product.type}</span></td>
-                                    {/* UPDATE: Display correct currency symbol */}
                                     <td>{currencies[product.currency] || '₵'}{product.price.toFixed(2)}</td>
                                     <td>{product.type === 'Physical' ? product.quantity : 'N/A'}</td>
                                     <td>
-                                       {showDeleteConfirm === product.id ? (
-                                           <div className="delete-confirm">
-                                               <span>Sure?</span>
-                                               <button onClick={() => handleDeleteProduct(product.id, product.imageUrl)}>Yes</button>
-                                               <button onClick={() => setShowDeleteConfirm(null)}>No</button>
-                                           </div>
-                                       ) : (
-                                            <div className="action-buttons">
-                                                <button className="action-btn edit" onClick={() => openEditModal(product)}><EditIcon/></button>
-                                                <button className="action-btn delete" onClick={() => setShowDeleteConfirm(product.id)}><TrashIcon/></button>
-                                            </div>
-                                       )}
+                                        <div className="action-buttons">
+                                            <button className="action-btn edit" onClick={() => openEditModal(product)}><EditIcon/></button>
+                                            {/* --- NEW: Trigger Modal instead of inline confirm --- */}
+                                            <button className="action-btn delete" onClick={() => setItemToDelete(product)}><TrashIcon/></button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -243,6 +240,14 @@ const Inventory = () => {
                     </table>
                 </div>
             )}
+
+            {/* --- NEW: Standalone Security Modal --- */}
+            <DeleteAuthModal 
+                isOpen={itemToDelete !== null}
+                onClose={() => setItemToDelete(null)}
+                itemName={itemToDelete?.name || 'Product'}
+                onSuccess={executeDelete}
+            />
 
             {isModalOpen && (
                 <div className="modal-overlay">
@@ -257,7 +262,6 @@ const Inventory = () => {
                             <div className="form-group"><label>Product Name</label><input type="text" value={productName} onChange={e => setProductName(e.target.value)} required /></div>
                             <div className="form-group"><label>Product Type</label><select value={productType} onChange={e => setProductType(e.target.value)}><option value="Physical">Physical Good</option><option value="Digital">Digital Product</option><option value="Ticket">Event Ticket</option></select></div>
                             
-                            {/* UPDATE: New Price and Currency input group */}
                             <div className="form-group">
                                 <label>Price</label>
                                 <div className="price-group">
