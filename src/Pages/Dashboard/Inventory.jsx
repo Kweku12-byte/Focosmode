@@ -1,13 +1,11 @@
 // src/Pages/Dashboard/Inventory.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import './Inventory.css';
-// FIX: Corrected import paths to go up two directories
 import { useAuth } from '../../context/AuthContext';
 import { db, storage } from '../../Services/firebase';
 import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
-// --- NEW: Import the Security Modal ---
 import DeleteAuthModal from './DeleteAuthModal';
 
 // --- Icon Components ---
@@ -17,13 +15,8 @@ const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewB
 const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>;
 const SearchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>;
 
-// --- NEW: Currency Definitions ---
 const currencies = {
-    'GHS': '₵',
-    'NGN': '₦',
-    'USD': '$',
-    'GBP': '£',
-    'EUR': '€',
+    'GHS': '₵', 'NGN': '₦', 'USD': '$', 'GBP': '£', 'EUR': '€',
 };
 
 const Inventory = () => {
@@ -41,14 +34,17 @@ const Inventory = () => {
     const [productName, setProductName] = useState('');
     const [productType, setProductType] = useState('Physical');
     const [price, setPrice] = useState('');
-    const [currency, setCurrency] = useState('GHS'); // NEW currency state
+    const [currency, setCurrency] = useState('GHS'); 
     const [quantity, setQuantity] = useState('');
     const [description, setDescription] = useState('');
     const [imageFile, setImageFile] = useState(null);
     const [existingImageUrl, setExistingImageUrl] = useState('');
     const fileInputRef = useRef(null);
     
-    // --- NEW: State for secure deletion ---
+    // --- NEW: Channel Toggles ---
+    const [sellInStore, setSellInStore] = useState(true);
+    const [sellOnline, setSellOnline] = useState(true);
+
     const [itemToDelete, setItemToDelete] = useState(null);
 
     useEffect(() => {
@@ -70,6 +66,10 @@ const Inventory = () => {
         e.preventDefault();
         setError('');
         if (!currentUser) return setError("You are not logged in.");
+
+        if (!sellInStore && !sellOnline) {
+            return setError("Product must be available in at least one sales channel.");
+        }
 
         if (imageFile && imageFile.size > 5 * 1024 * 1024) { 
             return setError("Image file is too large. Please upload an image under 5MB.");
@@ -98,6 +98,8 @@ const Inventory = () => {
             currency: currency, 
             description: description,
             imageUrl: imageUrl || '',
+            sellInStore: sellInStore, // --- NEW: Save channel preference ---
+            sellOnline: sellOnline,   // --- NEW: Save channel preference ---
         };
         if (productType === 'Physical') {
             productData.quantity = Number(quantity);
@@ -121,7 +123,6 @@ const Inventory = () => {
         }
     };
     
-    // --- NEW: Actual delete execution after PIN verification ---
     const executeDelete = async () => {
         if (!currentUser || !itemToDelete) return;
         try {
@@ -153,6 +154,11 @@ const Inventory = () => {
         setQuantity(product.quantity || '');
         setDescription(product.description || '');
         setExistingImageUrl(product.imageUrl || '');
+        
+        // --- NEW: Load saved channel preferences, default to true if missing ---
+        setSellInStore(product.sellInStore !== false);
+        setSellOnline(product.sellOnline !== false);
+
         setIsModalOpen(true);
     };
 
@@ -164,6 +170,8 @@ const Inventory = () => {
         setQuantity('');
         setDescription('');
         setExistingImageUrl('');
+        setSellInStore(true); // --- NEW: Reset to default ---
+        setSellOnline(true);  // --- NEW: Reset to default ---
         setImageFile(null);
         if(fileInputRef.current) fileInputRef.current.value = null;
     };
@@ -213,6 +221,7 @@ const Inventory = () => {
                                 <th>Product Name</th>
                                 <th>Type</th>
                                 <th>Price</th>
+                                <th>Channels</th> {/* --- NEW: Display Channels --- */}
                                 <th>Stock</th>
                                 <th>Actions</th>
                             </tr>
@@ -226,11 +235,16 @@ const Inventory = () => {
                                     <td>{product.name}</td>
                                     <td><span className={`product-type-badge ${product.type.toLowerCase()}`}>{product.type}</span></td>
                                     <td>{currencies[product.currency] || '₵'}{product.price.toFixed(2)}</td>
+                                    <td>
+                                        <div style={{ display: 'flex', gap: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                            {product.sellInStore !== false && <span style={{ background: '#e0e7ff', color: '#3730a3', padding: '2px 6px', borderRadius: '4px' }}>POS</span>}
+                                            {product.sellOnline !== false && <span style={{ background: '#dcfce3', color: '#166534', padding: '2px 6px', borderRadius: '4px' }}>Web</span>}
+                                        </div>
+                                    </td>
                                     <td>{product.type === 'Physical' ? product.quantity : 'N/A'}</td>
                                     <td>
                                         <div className="action-buttons">
                                             <button className="action-btn edit" onClick={() => openEditModal(product)}><EditIcon/></button>
-                                            {/* --- NEW: Trigger Modal instead of inline confirm --- */}
                                             <button className="action-btn delete" onClick={() => setItemToDelete(product)}><TrashIcon/></button>
                                         </div>
                                     </td>
@@ -241,7 +255,6 @@ const Inventory = () => {
                 </div>
             )}
 
-            {/* --- NEW: Standalone Security Modal --- */}
             <DeleteAuthModal 
                 isOpen={itemToDelete !== null}
                 onClose={() => setItemToDelete(null)}
@@ -275,6 +288,22 @@ const Inventory = () => {
                             </div>
 
                             {productType === 'Physical' && (<div className="form-group"><label>Quantity in Stock</label><input type="number" value={quantity} onChange={e => setQuantity(e.target.value)} required /></div>)}
+                            
+                            {/* --- NEW: Sales Channels Toggles --- */}
+                            <div className="form-group">
+                                <label>Sales Channels</label>
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'normal', cursor: 'pointer' }}>
+                                        <input type="checkbox" checked={sellInStore} onChange={e => setSellInStore(e.target.checked)} />
+                                        Point of Sale (In-Store)
+                                    </label>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'normal', cursor: 'pointer' }}>
+                                        <input type="checkbox" checked={sellOnline} onChange={e => setSellOnline(e.target.checked)} />
+                                        Online Storefront
+                                    </label>
+                                </div>
+                            </div>
+
                             <div className="form-group"><label>Description (Optional)</label><textarea value={description} onChange={e => setDescription(e.target.value)}></textarea></div>
                             {error && <p className="modal-error">{error}</p>}
                             <button type="submit" className="modal-submit-btn" disabled={uploading}>{uploading ? 'Saving...' : (isEditMode ? 'Update Product' : 'Add Product')}</button>

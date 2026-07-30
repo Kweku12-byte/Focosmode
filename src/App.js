@@ -4,10 +4,12 @@ import { AuthProvider } from './context/AuthContext';
 
 // --- Import Our Pages and Components ---
 import Focosmode from './Pages/focosmode'; 
-// UPDATE: Re-importing the ProtectedRoute component
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
-// UPDATE: Importing our new Dashboard component
 import FocosmodeDashboard from './Pages/Dashboard/FocosmodeDashboard';
+
+// --- NEW: Import the Public Storefront Components ---
+import ShopPublic from './Pages/Storefront/ShopPublic';
+import CheckoutPublic from './Pages/Storefront/CheckoutPublic';
 
 import './App.css';
 
@@ -17,12 +19,15 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
-            {/* --- Public Route --- */}
+            {/* --- Public Landing Page --- */}
             <Route path="/" element={<Focosmode />} />
 
-            {/* --- NEW: Protected Dashboard Route --- */}
-            {/* This route is wrapped by our ProtectedRoute component. */}
-            {/* Only logged-in users will be able to access it. */}
+            {/* --- Public E-commerce Storefront Routes --- */}
+            {/* The :businessId parameter allows Focosmode to dynamically load the right store data */}
+            <Route path="/store/:businessId" element={<ShopPublic />} />
+            <Route path="/checkout/:businessId" element={<CheckoutPublic />} />
+
+            {/* --- Protected Dashboard Route --- */}
             <Route 
               path="/dashboard" 
               element={

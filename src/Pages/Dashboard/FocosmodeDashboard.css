@@ -217,3 +217,20 @@
         padding: 0.5rem;
     }
 }
+
+/* --- NEW SIDEBAR SECTIONS --- */
+.sidebar-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1rem 0.5rem 1rem;
+    margin-top: 0.5rem;
+}
+
+.sidebar-divider {
+    border: none;
+    border-top: 1px solid #374151; /* Dark grey line */
+    margin: 1rem 1rem 0 1rem;
+}
