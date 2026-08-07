@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Inventory.css';
 import { useAuth } from '../../context/AuthContext';
-import { db, storage } from '../../Services/firebase';
+import { db } from '../../Services/firebase'; // --- REMOVED storage ---
 import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { uploadProductImage } from '../../Services/cloudinary'; // --- NEW: Cloudinary Service ---
 
 import DeleteAuthModal from './DeleteAuthModal';
 
@@ -19,7 +19,8 @@ const currencies = {
     'GHS': '₵', 'NGN': '₦', 'USD': '$', 'GBP': '£', 'EUR': '€',
 };
 
-const Inventory = () => {
+// --- NEW: Added viewMode prop ---
+const Inventory = ({ viewMode = 'all' }) => {
     const { currentUser } = useAuth();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -41,11 +42,18 @@ const Inventory = () => {
     const [existingImageUrl, setExistingImageUrl] = useState('');
     const fileInputRef = useRef(null);
     
-    // --- NEW: Channel Toggles ---
+    // --- Channel Toggles ---
     const [sellInStore, setSellInStore] = useState(true);
     const [sellOnline, setSellOnline] = useState(true);
 
     const [itemToDelete, setItemToDelete] = useState(null);
+
+    // --- NEW: Auto-open modal if sidebar "Add Product" is clicked ---
+    useEffect(() => {
+        if (viewMode === 'add-new') {
+            openAddModal();
+        }
+    }, [viewMode]);
 
     useEffect(() => {
         if (!currentUser) return;
@@ -79,13 +87,12 @@ const Inventory = () => {
         let imageUrl = existingImageUrl;
 
         if (imageFile) {
-            const imageRef = ref(storage, `products/${currentUser.uid}/${Date.now()}_${imageFile.name}`);
             try {
-                const snapshot = await uploadBytes(imageRef, imageFile);
-                imageUrl = await getDownloadURL(snapshot.ref);
+                // --- NEW: Cloudinary Upload Magic ---
+                imageUrl = await uploadProductImage(imageFile, currentUser.uid);
             } catch (err) {
                 console.error("Image upload error:", err);
-                setError("Failed to upload image.");
+                setError("Failed to upload image. Please check your connection.");
                 setUploading(false);
                 return;
             }
@@ -98,9 +105,10 @@ const Inventory = () => {
             currency: currency, 
             description: description,
             imageUrl: imageUrl || '',
-            sellInStore: sellInStore, // --- NEW: Save channel preference ---
-            sellOnline: sellOnline,   // --- NEW: Save channel preference ---
+            sellInStore: sellInStore,
+            sellOnline: sellOnline,  
         };
+        
         if (productType === 'Physical') {
             productData.quantity = Number(quantity);
         }
@@ -126,11 +134,12 @@ const Inventory = () => {
     const executeDelete = async () => {
         if (!currentUser || !itemToDelete) return;
         try {
+            // Delete product reference from Firestore
             await deleteDoc(doc(db, 'businesses', currentUser.uid, 'products', itemToDelete.id));
-            if (itemToDelete.imageUrl) {
-                const imageRef = ref(storage, itemToDelete.imageUrl);
-                await deleteObject(imageRef);
-            }
+            
+            // Note: Since this is a frontend-only app using Unsigned Uploads, 
+            // images remain safely stored on Cloudinary. If you ever build a Node.js backend, 
+            // you can trigger a hard-delete on Cloudinary from there.
         } catch (err) {
             console.error("Delete error:", err);
         } finally {
@@ -155,7 +164,6 @@ const Inventory = () => {
         setDescription(product.description || '');
         setExistingImageUrl(product.imageUrl || '');
         
-        // --- NEW: Load saved channel preferences, default to true if missing ---
         setSellInStore(product.sellInStore !== false);
         setSellOnline(product.sellOnline !== false);
 
@@ -170,8 +178,16 @@ const Inventory = () => {
         setQuantity('');
         setDescription('');
         setExistingImageUrl('');
-        setSellInStore(true); // --- NEW: Reset to default ---
-        setSellOnline(true);  // --- NEW: Reset to default ---
+        
+        // If they opened the modal from "Online Products", default it to online only
+        if (viewMode === 'online') {
+            setSellInStore(false);
+            setSellOnline(true);
+        } else {
+            setSellInStore(true); 
+            setSellOnline(true);  
+        }
+        
         setImageFile(null);
         if(fileInputRef.current) fileInputRef.current.value = null;
     };
@@ -182,14 +198,22 @@ const Inventory = () => {
         setError('');
     };
 
-    const filteredProducts = products.filter(product => 
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // --- NEW: Filter products based on Sidebar View Mode ---
+    const filteredProducts = products.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        // If viewMode is 'online', strictly hide POS-only items
+        if (viewMode === 'online' && product.sellOnline === false) return false;
+        
+        return matchesSearch;
+    });
 
     return (
         <div className="inventory-container">
             <div className="inventory-header">
-                <h2>Your Inventory</h2>
+                <h2>
+                    {viewMode === 'online' ? 'Online Products' : 'Your Inventory'}
+                </h2>
                 <div className="header-actions">
                      <div className="search-wrapper">
                         <SearchIcon />
@@ -221,7 +245,7 @@ const Inventory = () => {
                                 <th>Product Name</th>
                                 <th>Type</th>
                                 <th>Price</th>
-                                <th>Channels</th> {/* --- NEW: Display Channels --- */}
+                                <th>Channels</th> 
                                 <th>Stock</th>
                                 <th>Actions</th>
                             </tr>
@@ -289,7 +313,6 @@ const Inventory = () => {
 
                             {productType === 'Physical' && (<div className="form-group"><label>Quantity in Stock</label><input type="number" value={quantity} onChange={e => setQuantity(e.target.value)} required /></div>)}
                             
-                            {/* --- NEW: Sales Channels Toggles --- */}
                             <div className="form-group">
                                 <label>Sales Channels</label>
                                 <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>

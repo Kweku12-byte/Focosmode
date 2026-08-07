@@ -30,6 +30,10 @@ const CheckoutPublic = () => {
     const [orderId, setOrderId] = useState('');
 
     const currencySymbol = currencies[business?.currency] || '₵';
+    
+    // --- NEW: Figure out order type for the Dashboard ---
+    const needsShipping = cart.some(item => item.type === 'Physical');
+    const orderType = needsShipping ? 'Physical' : cart.some(item => item.type === 'Ticket') ? 'Ticket' : 'Digital';
 
     if (!cart || cart.length === 0) {
         return (
@@ -44,7 +48,8 @@ const CheckoutPublic = () => {
         setCustomerInfo({ ...customerInfo, [e.target.name]: e.target.value });
     };
 
-    const paystackPublicKey = "pk_test_e64a7d7da9cb457c18046674d890f84dbfb829aa"; 
+    // --- SECURE: Now pulling from your .env file! ---
+    const paystackPublicKey = process.env.REACT_APP_PAYSTACK_PUBLIC_KEY; 
 
     const paystackConfig = {
         reference: (new Date()).getTime().toString(),
@@ -57,20 +62,34 @@ const CheckoutPublic = () => {
     const handlePaystackSuccessAction = async (reference) => {
         setIsProcessing(true);
         try {
-            const saleData = {
-                items: cart.map(({id, name, price, type, quantity}) => ({id, name, price, type, quantity})),
+            // --- NEW: Structured to match OnlineOrders.jsx exactly ---
+            const orderData = {
+                customerName: customerInfo.name,
+                customerEmail: customerInfo.email,
+                customerPhone: customerInfo.phone,
+                currency: business?.currency || 'GHS',
                 totalAmount: cartTotal,
-                paymentMethod: 'Paystack Online',
-                reference: reference.reference,
-                origin: 'Online',
-                customer: customerInfo,
-                createdAt: new Date().toISOString(),
-                status: 'Paid & Pending Fulfillment'
+                createdAt: new Date(),
+                orderType: orderType,
+                status: needsShipping ? 'Pending' : 'Delivered', 
+                paystackRef: reference.reference,
+                items: cart.map(({id, name, price, type, quantity}) => ({id, name, price, type, quantity})),
+                
+                // Format address for the dashboard modal
+                shippingAddress: needsShipping ? {
+                    street: customerInfo.address,
+                    city: 'N/A',
+                    region: 'N/A',
+                    country: 'Ghana',
+                    notes: ''
+                } : null
             };
 
-            const salesRef = collection(db, 'businesses', businessId, 'sales');
-            const docRef = await addDoc(salesRef, saleData);
+            // --- SAVING TO 'orders' COLLECTION INSTEAD OF 'sales' ---
+            const ordersRef = collection(db, 'businesses', businessId, 'orders');
+            const docRef = await addDoc(ordersRef, orderData);
             
+            // Deduct Inventory
             const batch = writeBatch(db);
             cart.forEach(item => {
                 if (item.type === 'Physical') {
@@ -101,7 +120,6 @@ const CheckoutPublic = () => {
         onClose: handlePaystackCloseAction,
     };
 
-    // --- CLEANED SUCCESS UI ---
     if (paymentSuccess) {
         return (
             <div className="public-store-layout" style={{ backgroundColor: '#f9fafb', justifyContent: 'center', alignItems: 'center' }}>
@@ -119,7 +137,7 @@ const CheckoutPublic = () => {
 
                     <p className="success-email-note">A confirmation receipt has been sent to <strong>{customerInfo.email}</strong></p>
                     
-                    <button onClick={() => navigate(`/store/${businessId}`)} className="public-add-to-cart-btn" style={{ marginTop: '1.5rem' }}>
+                    <button onClick={() => navigate(`/store/${businessId}`)} className="public-add-to-cart-btn" style={{ marginTop: '1.5rem', backgroundColor: business?.brandColor || '#eab308', color: '#111827' }}>
                         Return to Store
                     </button>
                 </div>
@@ -140,29 +158,32 @@ const CheckoutPublic = () => {
                     <form className="checkout-form" onSubmit={(e) => e.preventDefault()}>
                         <div className="form-group">
                             <label>Full Name</label>
-                            <input type="text" name="name" value={customerInfo.name} onChange={handleInputChange} required placeholder="John Doe" />
+                            <input type="text" name="name" value={customerInfo.name} onChange={handleInputChange} required placeholder="John Doe" style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #d1d5db' }}/>
                         </div>
                         
                         <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                             <div className="form-group">
                                 <label>Email Address</label>
-                                <input type="email" name="email" value={customerInfo.email} onChange={handleInputChange} required placeholder="john@example.com" />
+                                <input type="email" name="email" value={customerInfo.email} onChange={handleInputChange} required placeholder="john@example.com" style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #d1d5db' }}/>
                             </div>
                             <div className="form-group">
                                 <label>Phone Number</label>
-                                <input type="tel" name="phone" value={customerInfo.phone} onChange={handleInputChange} required placeholder="+233..." />
+                                <input type="tel" name="phone" value={customerInfo.phone} onChange={handleInputChange} required placeholder="+233..." style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #d1d5db' }}/>
                             </div>
                         </div>
 
-                        <div className="form-group">
-                            <label>Delivery Address</label>
-                            <textarea name="address" rows="3" value={customerInfo.address} onChange={handleInputChange} required placeholder="Street address, city, region..."></textarea>
-                        </div>
+                        {/* Only show address if physical products are in cart */}
+                        {needsShipping && (
+                            <div className="form-group">
+                                <label>Delivery Address</label>
+                                <textarea name="address" rows="3" value={customerInfo.address} onChange={handleInputChange} required placeholder="Street address, city, region..." style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #d1d5db' }}></textarea>
+                            </div>
+                        )}
                         
-                        {customerInfo.name && customerInfo.email && customerInfo.phone && customerInfo.address ? (
-                            <PaystackButton className="paystack-checkout-btn" {...componentProps} />
+                        {(customerInfo.name && customerInfo.email && customerInfo.phone && (!needsShipping || customerInfo.address)) ? (
+                            <PaystackButton className="paystack-checkout-btn" style={{ backgroundColor: business?.brandColor || '#eab308', color: '#111827', width: '100%', padding: '1.25rem', border: 'none', borderRadius: '0.5rem', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer', marginTop: '1rem' }} {...componentProps} />
                         ) : (
-                            <button disabled className="paystack-checkout-btn disabled">
+                            <button disabled className="paystack-checkout-btn disabled" style={{ width: '100%', padding: '1.25rem', background: '#d1d5db', color: 'white', border: 'none', borderRadius: '0.5rem', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'not-allowed', marginTop: '1rem' }}>
                                 Fill details to Pay
                             </button>
                         )}
@@ -189,15 +210,15 @@ const CheckoutPublic = () => {
                     </div>
                     
                     <div className="summary-totals">
-                        <div className="summary-line">
+                        <div className="summary-line" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                             <span>Subtotal</span>
                             <span>{currencySymbol}{cartTotal.toFixed(2)}</span>
                         </div>
-                        <div className="summary-line">
+                        <div className="summary-line" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                             <span>Shipping</span>
                             <span>Calculated later</span>
                         </div>
-                        <div className="summary-line final-total">
+                        <div className="summary-line final-total" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem', fontWeight: 'bold', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e5e7eb' }}>
                             <span>Total</span>
                             <span>{currencySymbol}{cartTotal.toFixed(2)}</span>
                         </div>
